@@ -3,6 +3,7 @@ package win
 import (
 	"errors"
 	"jpmj_calc/combination"
+	"jpmj_calc/hand"
 )
 
 type Common_Win struct {
@@ -39,4 +40,20 @@ func AddPair(pair combination.Pair, sevenpairwin *Seven_Pairs_Win) error {
 		}
 	}
 	return errors.New("Error: Pairlist is already full")
+}
+func CreateCommon(hd hand.Hand) (Common_Win, bool) {
+	if hand.Len(hd)%3 != 2 {
+		return Common_Win{}, false
+	}
+
+	return Common_Win{}, false
+}
+func RemovePair(hd hand.Hand) (hand.Hand, combination.Pair, bool) {
+
+	
+	return hand.Hand{}, combination.Pair{}, false
+}
+func RemoveMenzi(hd hand.Hand) (hand.Hand, combination.Menzi, bool) {
+	return hand.Hand{}, combination.Menzi{}, false
+
 }

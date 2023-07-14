@@ -122,3 +122,21 @@ func SortAndReturnAkadora(hand *Hand) uint8 {
 
 	return akaMan + akaPin + akaSou
 }
+func IsValidHandNum(hand Hand) bool {
+	if Len(hand)%3 != 2 {
+		return false
+	}
+
+	manLen := len(hand.Man)
+	pinLen := len(hand.Pin)
+	souLen := len(hand.Sou)
+	ziLen := len(hand.Zi)
+
+	if (manLen%3 == 0 && pinLen%3 == 0 && souLen%3 == 0) || (manLen%3 == 0 && pinLen%3 == 0 && ziLen%3 == 0) ||
+		(manLen%3 == 0 && souLen%3 == 0 && ziLen%3 == 0) || (pinLen%3 == 0 && souLen%3 == 0 && ziLen%3 == 0) {
+		return true
+	}
+
+	return false
+
+}
