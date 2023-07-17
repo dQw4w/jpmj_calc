@@ -15,6 +15,27 @@ type Hand struct {
 func Len(hand Hand) int {
 	return len(hand.Man) + len(hand.Pin) + len(hand.Sou) + len(hand.Zi)
 }
+func AllLen(hand Hand) (int, int, int, int) {
+	return len(hand.Man), len(hand.Pin), len(hand.Sou), len(hand.Zi)
+}
+func Copy(src Hand) Hand {
+	dst := Hand{}
+	dst.Man = make([]uint8, len(src.Man))
+	dst.Pin = make([]uint8, len(src.Pin))
+	dst.Sou = make([]uint8, len(src.Sou))
+	dst.Zi = make([]uint8, len(src.Zi))
+	copy(dst.Man, src.Man)
+	copy(dst.Pin, src.Pin)
+	copy(dst.Sou, src.Sou)
+	copy(dst.Zi, src.Zi)
+	return dst
+}
+func IsEmptyHand(hand Hand) bool {
+	if Len(hand) == 0 {
+		return true
+	}
+	return false
+}
 
 func ConvertStrToHand(str_hand string) (Hand, error) {
 

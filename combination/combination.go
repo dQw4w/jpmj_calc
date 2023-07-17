@@ -2,6 +2,7 @@ package combination
 
 import (
 	"errors"
+	"fmt"
 )
 
 type Pair struct {
@@ -77,6 +78,7 @@ func IsEmptyPair(pair Pair) bool {
 	}
 	return false
 }
+
 func NewPair(suit byte, rank uint8) (Pair, error) {
 
 	if valid, err := isValid(suit, rank, 'P'); !valid {
@@ -114,6 +116,7 @@ func NewTriplet(suit byte, rank uint8) (Menzi, error) {
 		Rank: rank,
 	}, nil
 }
+
 func NewKanzi_closed(suit byte, rank uint8) (Menzi, error) {
 
 	if valid, err := isValid(suit, rank, 'C'); !valid {
@@ -137,4 +140,115 @@ func NewKanzi_open(suit byte, rank uint8) (Menzi, error) {
 		Suit: suit,
 		Rank: rank,
 	}, nil
+}
+func New_Menzi(tp byte, suit byte, rank uint8) (Menzi, error) {
+	//log.Print("tp:")
+	//log.Println(tp)
+	switch tp {
+	case 'S':
+		return NewStraight(suit, rank)
+	case 'T':
+		return NewTriplet(suit, rank)
+	case 'C':
+		return NewKanzi_closed(suit, rank)
+	case 'O':
+		return NewKanzi_open(suit, rank)
+	default:
+		return Menzi{}, errors.New("Invalid input for New_Menzi func")
+	}
+}
+func PairString(p Pair) string {
+	var output, suitstr string
+	switch p.Suit {
+	case 'm':
+		suitstr = "萬"
+	case 'p':
+		suitstr = "筒"
+	case 's':
+		suitstr = "索"
+	case 'z':
+		switch p.Rank {
+		case 1:
+			suitstr = "東"
+		case 2:
+			suitstr = "南"
+		case 3:
+			suitstr = "西"
+		case 4:
+			suitstr = "北"
+		case 5:
+			suitstr = "白"
+		case 6:
+			suitstr = "發"
+		case 7:
+			suitstr = "中"
+		default:
+			suitstr = ""
+		}
+	default:
+		suitstr = ""
+	}
+
+	if p.Suit == 'z' {
+		output = fmt.Sprintf("%s%s", suitstr, suitstr)
+	} else {
+		output = fmt.Sprintf("%v%v%s", p.Rank, p.Rank, suitstr)
+	}
+
+	return output
+}
+func MenziString(m Menzi) string {
+	var output, suitstr string
+	switch m.Suit {
+	case 'm':
+		suitstr = "萬"
+	case 'p':
+		suitstr = "筒"
+	case 's':
+		suitstr = "索"
+	case 'z':
+		switch m.Rank {
+		case 1:
+			suitstr = "東"
+		case 2:
+			suitstr = "南"
+		case 3:
+			suitstr = "西"
+		case 4:
+			suitstr = "北"
+		case 5:
+			suitstr = "白"
+		case 6:
+			suitstr = "發"
+		case 7:
+			suitstr = "中"
+		default:
+			suitstr = ""
+		}
+	default:
+		suitstr = ""
+	}
+	switch m.Type {
+	case 'S':
+		output = fmt.Sprintf("%v%v%v%s", m.Rank, m.Rank+1, m.Rank+2, suitstr)
+	case 'T':
+		if m.Suit == 'z' {
+			output = fmt.Sprintf("%s%s%s", suitstr, suitstr, suitstr)
+		} else {
+			output = fmt.Sprintf("%v%v%v%s", m.Rank, m.Rank, m.Rank, suitstr)
+		}
+	case 'C':
+		if m.Suit == 'z' {
+			output = fmt.Sprintf("X%s%sX", suitstr, suitstr)
+		} else {
+			output = fmt.Sprintf("X%v%vX%s", m.Rank, m.Rank, suitstr)
+		}
+	case 'O':
+		if m.Suit == 'z' {
+			output = fmt.Sprintf("%s%s%s%s", suitstr, suitstr, suitstr, suitstr)
+		} else {
+			output = fmt.Sprintf("%v%v%v%v%s", m.Rank, m.Rank, m.Rank, m.Rank, suitstr)
+		}
+	}
+	return output
 }
