@@ -4,11 +4,38 @@ import (
 	"errors"
 	"jpmj_calc/combination"
 	"jpmj_calc/hand"
+	"log"
 )
 
 type Common_Win struct {
-	MenziList [4]combination.Menzi
-	Eye       combination.Pair
+	MenziList    [4]combination.Menzi
+	Eye          combination.Pair
+	Win_Com_IDX  int // 4 represents eye
+	Win_Tile_IDX int
+	Tsumo        bool
+	Menchin      bool
+	SelfWind     uint8 //1234 ESWN
+	FieldWind    uint8 //1234
+
+	//special
+	Reach       bool
+	DoubleReach bool // Reach and Double Reach only one is true
+	ChanKan     bool
+	RinShan     bool
+	HaiTei      bool
+	HoTei       bool
+	Ippatsu     bool
+
+	//yakuman special
+	TenHo bool
+	JiHo  bool
+
+	Akadora       int
+	Motedora_suit byte
+	Motedora_rank uint8
+
+	Uradora_suit byte
+	Uradora_rank uint8
 }
 
 type Seven_Pairs_Win struct {
@@ -37,6 +64,19 @@ func SetPair(pair combination.Pair, common Common_Win) (Common_Win, error) {
 	common.Eye = pair
 	return common, nil
 }
+func HaveEye(common Common_Win) bool {
+	return !combination.IsEmptyPair(common.Eye)
+}
+func Menzi_Count(common Common_Win) int {
+	count := 0
+	for i := range common.MenziList {
+		if combination.IsEmptyMenzi(common.MenziList[i]) {
+			break
+		}
+		count++
+	}
+	return count
+}
 func AddPair(pair combination.Pair, sevenpairwin Seven_Pairs_Win) (Seven_Pairs_Win, error) {
 	for i := range sevenpairwin.PairList {
 		if combination.IsEmptyPair(sevenpairwin.PairList[i]) {
@@ -52,19 +92,24 @@ type NewHandAndRemovedMenzis struct {
 	RemovedMenzis []combination.Menzi
 }
 
-func CreateCommon(hd hand.Hand) ([]Common_Win, bool) {
+// TODO: set the menzi including the win tile to furo
+func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 	var result []Common_Win
 	if !hand.IsValidHandNum(hd) {
 		//log.Println("hd len is invalid")
 		return result, false
 	}
-	for i := 0; i < 13; i++ { // checks from the first tile to the second-to-last
+	//menzi_count := Menzi_Count(cw)
+
+	for i := 0; i < hand.Len(hd); i++ { // checks from the first tile to the second-to-last
 		newhd, pair, valid := RemovePair(hd, i)
 		if valid {
 			//log.Println(newhd)
 			//log.Println(pair)
 
 			NewWin := Common_Win{}
+			NewWin, _ = CopyCommon(cw)
+			log.Println("Newwin:", NewWin)
 			NewWin, _ = SetPair(pair, NewWin)
 			possibles := []NewHandAndRemovedMenzis{NewHandAndRemovedMenzis{NewHand: newhd}}
 			//log.Println(NewWin)
@@ -72,7 +117,7 @@ func CreateCommon(hd hand.Hand) ([]Common_Win, bool) {
 			possibles[0].RemovedMenzis = append(possibles[0].RemovedMenzis, hel)
 			log.Println("hi")
 			log.Println(possibles)*/
-			for i := 0; i < 4; i++ {
+			for i := 0; i < 4-Menzi_Count(cw); i++ {
 				cases := len(possibles)
 				for j := 0; j < cases; j++ {
 					//log.Println("case to remove:", possibles[0])
@@ -103,15 +148,17 @@ func CreateCommon(hd hand.Hand) ([]Common_Win, bool) {
 func CopyCommon(src Common_Win) (Common_Win, error) {
 	dst := Common_Win{}
 	dst.MenziList = [4]combination.Menzi{}
-	var err1, err2 error
-	dst.Eye, err1 = combination.NewPair(src.Eye.Suit, src.Eye.Rank)
+	var err2 error
+	dst.Eye, _ = combination.NewPair(src.Eye.Suit, src.Eye.Rank, src.Eye.Furo)
+	dst.Tsumo = src.Tsumo
+	dst.Menchin = src.Menchin
 	//log.Println(dst.Eye)
-	if err1 != nil {
+	/*if err1 != nil {
 		//panic(err1)
 		return Common_Win{}, err1
-	}
+	}*/
 	for i := range dst.MenziList {
-		dst.MenziList[i], err2 = combination.New_Menzi(src.MenziList[i].Type, src.MenziList[i].Suit, src.MenziList[i].Rank)
+		dst.MenziList[i], err2 = combination.New_Menzi(src.MenziList[i].Type, src.MenziList[i].Suit, src.MenziList[i].Rank, src.MenziList[i].Furo)
 		if err2 != nil {
 			//panic(err2)
 			return dst, err2
@@ -131,7 +178,7 @@ func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 			return hand.Hand{}, combination.Pair{}, false
 		}
 		if mLen > idx+1 && hd.Man[idx] == hd.Man[idx+1] {
-			pair, err := combination.NewPair('m', hd.Man[idx])
+			pair, err := combination.NewPair('m', hd.Man[idx], false)
 
 			//log.Printf("newpairm = %v\n", hd.Man[idx])
 			if err == nil {
@@ -151,7 +198,7 @@ func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 		pIdx := idx - mLen // Adjusted index within the p section
 		//log.Printf("pidx=%v\n", pIdx)
 		if pLen > pIdx+1 && hd.Pin[pIdx] == hd.Pin[pIdx+1] {
-			pair, err := combination.NewPair('p', hd.Pin[pIdx])
+			pair, err := combination.NewPair('p', hd.Pin[pIdx], false)
 			//log.Printf("newpairp = %v\n", hd.Man[pIdx])
 
 			if err == nil {
@@ -168,7 +215,7 @@ func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 		//log.Printf("sidx=%v\n", sIdx)
 
 		if sLen > sIdx+1 && hd.Sou[sIdx] == hd.Sou[sIdx+1] {
-			pair, err := combination.NewPair('s', hd.Sou[sIdx])
+			pair, err := combination.NewPair('s', hd.Sou[sIdx], false)
 			//log.Printf("newpairs = %v\n", hd.Man[sIdx])
 			if err == nil {
 				newhd := hand.Copy(hd)
@@ -185,7 +232,7 @@ func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 		//log.Printf("zidx=%v\n", zIdx)
 
 		if zLen > zIdx+1 && hd.Zi[zIdx] == hd.Zi[int(zIdx+1)] {
-			pair, err := combination.NewPair('z', hd.Zi[zIdx])
+			pair, err := combination.NewPair('z', hd.Zi[zIdx], false)
 			//log.Printf("newpairz = %v\n", hd.Zi[zIdx])
 
 			if err == nil {
@@ -216,7 +263,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 
 	if len(hd.Man) != 0 {
 		if hd.Man[0] == hd.Man[1] && hd.Man[1] == hd.Man[2] {
-			trp, err := combination.NewTriplet('m', hd.Man[0])
+			trp, err := combination.NewTriplet('m', hd.Man[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Man = newhd.Man[3:] // Remove elements of index = 0, 1, 2
@@ -237,7 +284,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		}
 
 		if idx1 != 0 && idx2 != 0 {
-			stra, err := combination.NewStraight('m', hd.Man[0])
+			stra, err := combination.NewStraight('m', hd.Man[0], false)
 			if err == nil {
 				//log.Println("yay!")
 				newhd := hand.Copy(hd)
@@ -251,7 +298,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		//TODO: finish Pin,Sou,Zi accoring to Man (the straight part of the following code is wrong)
 	} else if len(hd.Pin) != 0 {
 		if hd.Pin[0] == hd.Pin[1] && hd.Pin[1] == hd.Pin[2] {
-			trp, err := combination.NewTriplet('p', hd.Pin[0])
+			trp, err := combination.NewTriplet('p', hd.Pin[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Pin = newhd.Pin[3:] // Remove elements of index = 0, 1, 2
@@ -273,7 +320,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		}
 
 		if idx1 != 0 && idx2 != 0 {
-			stra, err := combination.NewStraight('p', hd.Pin[0])
+			stra, err := combination.NewStraight('p', hd.Pin[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Pin = RemoveElements(newhd.Pin, 0, idx1, idx2) // Remove elements of index = 0, 1, 2
@@ -285,7 +332,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		}
 	} else if len(hd.Sou) != 0 {
 		if hd.Sou[0] == hd.Sou[1] && hd.Sou[1] == hd.Sou[2] {
-			trp, err := combination.NewTriplet('s', hd.Sou[0])
+			trp, err := combination.NewTriplet('s', hd.Sou[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Sou = newhd.Sou[3:] // Remove elements of index = 0, 1, 2
@@ -307,7 +354,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		}
 
 		if idx1 != 0 && idx2 != 0 {
-			stra, err := combination.NewStraight('s', hd.Sou[0])
+			stra, err := combination.NewStraight('s', hd.Sou[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Sou = RemoveElements(newhd.Sou, 0, idx1, idx2) // Remove elements of index = 0, 1, 2
@@ -319,7 +366,7 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 		}
 	} else if len(hd.Zi) != 0 {
 		if hd.Zi[0] == hd.Zi[1] && hd.Zi[1] == hd.Zi[2] {
-			trp, err := combination.NewTriplet('z', hd.Zi[0])
+			trp, err := combination.NewTriplet('z', hd.Zi[0], false)
 			if err == nil {
 				newhd := hand.Copy(hd)
 				newhd.Zi = newhd.Zi[3:] // Remove elements of index = 0, 1, 2
@@ -373,7 +420,7 @@ func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
 	}
 	for i := 0; i < len(hd.Man); i += 2 {
 		if hd.Man[i] == hd.Man[i+1] {
-			pair, _ := combination.NewPair('m', hd.Man[i])
+			pair, _ := combination.NewPair('m', hd.Man[i], false)
 			result, _ = AddPair(pair, result)
 		} else {
 			return Seven_Pairs_Win{}, false
@@ -381,7 +428,7 @@ func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
 	}
 	for i := 0; i < len(hd.Pin); i += 2 {
 		if hd.Pin[i] == hd.Pin[i+1] {
-			pair, _ := combination.NewPair('p', hd.Pin[i])
+			pair, _ := combination.NewPair('p', hd.Pin[i], false)
 			result, _ = AddPair(pair, result)
 		} else {
 			return Seven_Pairs_Win{}, false
@@ -390,7 +437,7 @@ func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
 
 	for i := 0; i < len(hd.Sou); i += 2 {
 		if hd.Sou[i] == hd.Sou[i+1] {
-			pair, _ := combination.NewPair('s', hd.Sou[i])
+			pair, _ := combination.NewPair('s', hd.Sou[i], false)
 			result, _ = AddPair(pair, result)
 		} else {
 			return Seven_Pairs_Win{}, false
@@ -399,7 +446,7 @@ func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
 
 	for i := 0; i < len(hd.Zi); i += 2 {
 		if hd.Zi[i] == hd.Zi[i+1] {
-			pair, _ := combination.NewPair('z', hd.Zi[i])
+			pair, _ := combination.NewPair('z', hd.Zi[i], false)
 			result, _ = AddPair(pair, result)
 		} else {
 			return Seven_Pairs_Win{}, false
@@ -579,4 +626,21 @@ func SevenPairString(s Seven_Pairs_Win) string {
 		output += " "
 	}
 	return output
+}
+
+func GetWinningTile(cw Common_Win) (byte, uint8) {
+	var suit byte
+	var rank uint8
+	if cw.Win_Com_IDX == 4 {
+		suit = cw.Eye.Suit
+		rank = cw.Eye.Rank
+	} else {
+		suit = cw.MenziList[cw.Win_Com_IDX].Suit
+		var addIDX uint8 = 0
+		if cw.MenziList[cw.Win_Com_IDX].Type == 'S' {
+			addIDX = uint8(cw.Win_Tile_IDX)
+		}
+		rank = cw.MenziList[cw.Win_Com_IDX].Rank + addIDX
+	}
+	return suit, rank
 }

@@ -5,15 +5,21 @@ import (
 	"fmt"
 )
 
+type Tile struct {
+	Suit byte
+	Rank uint8
+}
 type Pair struct {
 	Suit byte
 	Rank uint8
+	Furo bool
 }
 
 type Menzi struct {
 	Type byte // straight:S,triplet:T,kanzi_closed:C,kanzi_open:O
 	Suit byte
 	Rank uint8
+	Furo bool
 }
 type Straight struct {
 	Menzi
@@ -72,14 +78,29 @@ func IsEmptyMenzi(menzi Menzi) bool {
 	}
 	return false
 }
+func IsEmptyTile(tile Tile) bool {
+	if tile.Suit == 0 {
+		return true
+	}
+	return false
+}
 func IsEmptyPair(pair Pair) bool {
 	if pair.Suit == 0 {
 		return true
 	}
 	return false
 }
-
-func NewPair(suit byte, rank uint8) (Pair, error) {
+func NewTile(suit byte, rank uint8) (Tile, error) {
+	if valid, err := isValid(suit, rank, 'P'); !valid { // validity same as pair
+		return Tile{}, err
+	}
+	return Tile{
+		Suit: suit,
+		Rank: rank,
+		//Furo: furo,
+	}, nil
+}
+func NewPair(suit byte, rank uint8, furo bool) (Pair, error) {
 
 	if valid, err := isValid(suit, rank, 'P'); !valid {
 		return Pair{}, err
@@ -88,10 +109,11 @@ func NewPair(suit byte, rank uint8) (Pair, error) {
 	return Pair{
 		Suit: suit,
 		Rank: rank,
+		Furo: furo,
 	}, nil
 }
 
-func NewStraight(suit byte, rank uint8) (Menzi, error) {
+func NewStraight(suit byte, rank uint8, furo bool) (Menzi, error) {
 
 	if valid, err := isValid(suit, rank, 'S'); !valid {
 		return Menzi{}, err
@@ -101,10 +123,11 @@ func NewStraight(suit byte, rank uint8) (Menzi, error) {
 		Type: 'S',
 		Suit: suit,
 		Rank: rank,
+		Furo: furo,
 	}, nil
 }
 
-func NewTriplet(suit byte, rank uint8) (Menzi, error) {
+func NewTriplet(suit byte, rank uint8, furo bool) (Menzi, error) {
 
 	if valid, err := isValid(suit, rank, 'T'); !valid {
 		return Menzi{}, err
@@ -114,10 +137,11 @@ func NewTriplet(suit byte, rank uint8) (Menzi, error) {
 		Type: 'T',
 		Suit: suit,
 		Rank: rank,
+		Furo: furo,
 	}, nil
 }
 
-func NewKanzi_closed(suit byte, rank uint8) (Menzi, error) {
+func NewKanzi_closed(suit byte, rank uint8, furo bool) (Menzi, error) {
 
 	if valid, err := isValid(suit, rank, 'C'); !valid {
 		return Menzi{}, err
@@ -127,9 +151,10 @@ func NewKanzi_closed(suit byte, rank uint8) (Menzi, error) {
 		Type: 'C',
 		Suit: suit,
 		Rank: rank,
+		Furo: false,
 	}, nil
 }
-func NewKanzi_open(suit byte, rank uint8) (Menzi, error) {
+func NewKanzi_open(suit byte, rank uint8, furo bool) (Menzi, error) {
 
 	if valid, err := isValid(suit, rank, 'O'); !valid {
 		return Menzi{}, err
@@ -139,20 +164,27 @@ func NewKanzi_open(suit byte, rank uint8) (Menzi, error) {
 		Type: 'O',
 		Suit: suit,
 		Rank: rank,
+		Furo: true,
 	}, nil
 }
-func New_Menzi(tp byte, suit byte, rank uint8) (Menzi, error) {
+func New_Menzi(tp byte, suit byte, rank uint8, furo bool) (Menzi, error) {
 	//log.Print("tp:")
 	//log.Println(tp)
 	switch tp {
 	case 'S':
-		return NewStraight(suit, rank)
+		return NewStraight(suit, rank, furo)
 	case 'T':
-		return NewTriplet(suit, rank)
+		return NewTriplet(suit, rank, furo)
 	case 'C':
-		return NewKanzi_closed(suit, rank)
+		if furo {
+			return Menzi{}, errors.New("Invalid input for New_Menzi func")
+		}
+		return NewKanzi_closed(suit, rank, furo)
 	case 'O':
-		return NewKanzi_open(suit, rank)
+		if !furo {
+			return Menzi{}, errors.New("Invalid input for New_Menzi func")
+		}
+		return NewKanzi_open(suit, rank, furo)
 	default:
 		return Menzi{}, errors.New("Invalid input for New_Menzi func")
 	}
@@ -251,4 +283,67 @@ func MenziString(m Menzi) string {
 		}
 	}
 	return output
+}
+func ConvertStrToMenzi(str string) (Menzi, int /*akadora*/, error) {
+	var akadora int
+	length := len(str)
+	ranks := []uint8{}
+	for i := 0; i < length-1; i++ {
+		if str[i] == '0' {
+			akadora++
+			ranks = append(ranks, 5)
+		} else if str[i]-'0' <= 9 {
+			ranks = append(ranks, uint8(str[i]-'0'))
+		} else if str[i] == 'X' {
+			ranks = append(ranks, 69) //69 represents closed kanzi
+		} else {
+			return Menzi{}, 0, errors.New("Invalid input for ConvertStrToMenzi func")
+		}
+	}
+	if length == 4 {
+		switch str[3] {
+		case 'm', 'p', 's', 'z':
+			if ranks[0] == ranks[1] && ranks[1] == ranks[2] {
+				trp, err := NewTriplet(str[3], ranks[0], true)
+				if err == nil {
+					return trp, 0, nil
+				}
+			} else if ranks[2]-ranks[1] == 1 && ranks[1]-ranks[0] == 1 {
+				stra, err := NewStraight(str[3], ranks[0], true)
+				if err == nil {
+					return stra, 0, nil
+				}
+			}
+
+		}
+	} else if length == 5 {
+		switch str[4] {
+		case 'm', 'p', 's', 'z':
+			if ranks[0] == 69 && ranks[3] == 69 && ranks[1] == ranks[2] {
+				closekan, err := NewKanzi_closed(str[4], ranks[1], false)
+				if err == nil {
+					return closekan, 0, nil
+				}
+			} else if ranks[0] == ranks[1] && ranks[2] == ranks[3] && ranks[1] == ranks[2] {
+				openkan, err := NewKanzi_open(str[4], ranks[1], true)
+				if err == nil {
+					return openkan, 0, nil
+				}
+			}
+		}
+	}
+	return Menzi{}, 0, errors.New("Invalid input for ConvertStrToMenzi func")
+
+}
+func SameMenzi(a Menzi, b Menzi) bool {
+	if a.Type != b.Type {
+		return false
+	}
+	if a.Suit != b.Suit {
+		return false
+	}
+	if a.Rank != b.Rank {
+		return false
+	}
+	return true
 }

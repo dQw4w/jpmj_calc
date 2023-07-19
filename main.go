@@ -3,6 +3,8 @@ package main
 import (
 	//"jpmj_calc/test1"
 
+	"fmt"
+	"jpmj_calc/combination"
 	"jpmj_calc/hand"
 	"jpmj_calc/win"
 	"log"
@@ -18,6 +20,10 @@ import (
 */
 func main() {
 
+	/*d := win.CreateEmptyCommon()
+	fmt.Println(win.HaveEye(d))
+	fmt.Println((win.Menzi_Count(d)))
+	return*/
 	/*c := win.CreateEmptyCommon()
 	log.Println(c)
 	return
@@ -65,18 +71,48 @@ func main() {
 	//log.Println(a.MenziList[0])*/
 
 	//a, err := hand.ConvertStrToHand("12122m460ps222333z")
-	a, err := hand.ConvertStrToHand("19m19p11s12234567z") //test different inputs here
+	handstr := "111222333mp8sz"
 
+	a, err := hand.ConvertStrToHand(handstr /*"19m19p119s123456z"*/) //test different inputs here
 	if err != nil {
-		log.Println(err)
+		log.Panic(err)
+
 	}
+	a, _ = hand.AppendOne(a, "8s")
+	if hand.Len(a)%3 != 2 {
+		panic("no!")
+	}
+
+	tempwin := win.CreateEmptyCommon()
+	log.Println((hand.Len(a) - 2) / 3)
+	for i := 0; i < 4-(hand.Len(a)-2)/3; i++ {
+		var input string
+		fmt.Scanf("%s", &input)
+		//input = "X99Xp"
+		if input == "" {
+			i--
+			continue
+		}
+		log.Println("read:", input)
+		newmenzi, _, err1 := combination.ConvertStrToMenzi(input)
+		if err1 != nil {
+			log.Println("Invalid!")
+			i--
+		} else {
+			tempwin, _ = win.AddMenzi(newmenzi, tempwin)
+		}
+	}
+
 	log.Println(hand.SortAndReturnAkadora(&a))
 	log.Println(a)
-	result, valid := win.CreateCommon(a)
+	log.Println("tempwin:", tempwin)
+	result, valid := win.CreateCommon(a, tempwin)
+	log.Println("result plain:", result)
 	if valid {
 		log.Print("result:")
 		for i := range result {
 			log.Println(win.CommonString(result[i]))
+			log.Printf("HaveEye:%t\nMenziCount:%v\n", win.HaveEye(result[i]), win.Menzi_Count(result[i]))
 		}
 		//combination.MenziS
 	} else {

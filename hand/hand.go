@@ -3,6 +3,7 @@ package hand
 import (
 	"errors"
 	"fmt"
+	"log"
 )
 
 type Hand struct {
@@ -90,6 +91,28 @@ func ConvertStrToHand(str_hand string) (Hand, error) {
 
 	}
 	return out, nil
+}
+func AppendOne(hd Hand, str_mj string) (Hand, error) {
+	var rk uint8 = str_mj[0] - '0'
+	if len(str_mj) != 2 || rk > 9 {
+		return hd, errors.New("Error: invalid input for AppendOne func")
+	}
+	switch str_mj[1] {
+	case 'm':
+		hd.Man = append(hd.Man, rk)
+	case 'p':
+		hd.Pin = append(hd.Pin, rk)
+	case 's':
+		hd.Sou = append(hd.Sou, rk)
+	case 'z':
+		if rk > 7 || rk == 0 {
+			return hd, errors.New("Error: invalid input for AppendOne func")
+		}
+		hd.Zi = append(hd.Zi, rk)
+		log.Println("hd zi after:", hd.Zi)
+
+	}
+	return hd, nil
 }
 
 // quick sort funcs cited from https://blog.boot.dev/golang/quick-sort-golang/
