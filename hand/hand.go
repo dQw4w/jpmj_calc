@@ -7,10 +7,12 @@ import (
 )
 
 type Hand struct {
-	Man []uint8
-	Pin []uint8
-	Sou []uint8
-	Zi  []uint8
+	Man      []uint8
+	Pin      []uint8
+	Sou      []uint8
+	Zi       []uint8
+	Win_Suit byte
+	Win_Rank uint8
 }
 
 func Len(hand Hand) int {
@@ -29,6 +31,8 @@ func Copy(src Hand) Hand {
 	copy(dst.Pin, src.Pin)
 	copy(dst.Sou, src.Sou)
 	copy(dst.Zi, src.Zi)
+	dst.Win_Suit = src.Win_Suit
+	dst.Win_Rank = src.Win_Rank
 	return dst
 }
 func IsEmptyHand(hand Hand) bool {
@@ -110,8 +114,9 @@ func AppendOne(hd Hand, str_mj string) (Hand, error) {
 		}
 		hd.Zi = append(hd.Zi, rk)
 		log.Println("hd zi after:", hd.Zi)
-
 	}
+	hd.Win_Suit = str_mj[1]
+	hd.Win_Rank = rk
 	return hd, nil
 }
 

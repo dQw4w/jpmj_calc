@@ -1,6 +1,7 @@
 package yaku_common
 
 import (
+	"fmt"
 	"jpmj_calc/combination"
 	"jpmj_calc/win"
 	"log"
@@ -118,13 +119,13 @@ func Yakuhai_Sangen(cw win.Common_Win) (int, string) {
 
 				switch menzi.Rank {
 				case 5:
-					msg += "役牌　白　1飜\n"
+					msg += "役牌 白 1飜\n"
 
 				case 6:
-					msg += "役牌　發　1飜\n"
+					msg += "役牌 發 1飜\n"
 
 				case 7:
-					msg += "役牌　中　1飜\n"
+					msg += "役牌 中 1飜\n"
 				}
 			}
 		}
@@ -135,31 +136,45 @@ func Yakuhai_Sangen(cw win.Common_Win) (int, string) {
 func Pinhu(cw win.Common_Win) (int, string) { // unfinished
 
 	if !cw.Menchin {
+		//log.Println("a")
 		return 0, ""
 	}
 	for i := range cw.MenziList {
 		if cw.MenziList[i].Type != 'S' {
+			//log.Println("b")
+
 			return 0, ""
+
 		}
 	}
 	//TODO:if eye is yakuhai, false
 	if cw.Eye.Suit == 'z' { //Eye is yakuhai
 		if cw.Eye.Rank == cw.SelfWind || cw.Eye.Rank == cw.FieldWind || cw.Eye.Rank >= 5 {
+			//log.Println("c")
+
 			return 0, ""
 		}
 	}
 	//TODO:聽牌型
 	if cw.Win_Com_IDX == 4 { //單騎
+		//log.Println("d")
+
 		return 0, ""
 	}
 	if cw.Win_Tile_IDX == 1 { //坎張
+		//log.Println("e")
+
 		return 0, ""
 	}
 	//邊張
 	if cw.Win_Tile_IDX == 0 && cw.MenziList[cw.Win_Com_IDX].Rank == 7 {
+		//log.Println("f")
+
 		return 0, ""
 	}
 	if cw.Win_Tile_IDX == 2 && cw.MenziList[cw.Win_Com_IDX].Rank == 1 {
+		//log.Println("g")
+
 		return 0, ""
 	}
 	return 1, "平和 1飜\n"
@@ -173,6 +188,9 @@ func OnePekoandTwoPeko(cw win.Common_Win) (int, string) {
 	var msg string
 	var used_j int
 	for i := 0; i < 3; i++ {
+		if i == used_j && i != 0 {
+			continue
+		}
 		for j := i + 1; j < 4; j++ {
 			if j == used_j {
 				continue
@@ -368,6 +386,11 @@ func ChanTa(cw win.Common_Win) (int, string) {
 		return 0, ""
 	}
 	var havezi bool = false
+	if cw.Eye.Suit == 'z' {
+		havezi = true
+	} else if cw.Eye.Rank != 1 && cw.Eye.Rank != 9 {
+		return 0, ""
+	}
 	for i := range cw.MenziList {
 		if cw.MenziList[i].Suit == 'z' {
 			havezi = true
@@ -392,9 +415,9 @@ func ChanTa(cw win.Common_Win) (int, string) {
 		}
 	} else {
 		if cw.Menchin {
-			return 3, "純全帯么九 3飜"
+			return 3, "純全帯么九 3飜\n"
 		} else {
-			return 2, "純全帯么九 2飜"
+			return 2, "純全帯么九 2飜\n"
 		}
 	}
 }
@@ -427,7 +450,7 @@ func OneDragon(cw win.Common_Win) (int, string) {
 		if menzi1.Rank == menzi2.Rank || menzi2.Rank == menzi3.Rank || menzi3.Rank == menzi1.Rank {
 			continue
 		}
-		if menzi1.Rank%3 == 0 && menzi2.Rank%3 == 0 && menzi3.Rank%3 == 0 {
+		if menzi1.Rank%3 == 1 && menzi2.Rank%3 == 1 && menzi3.Rank%3 == 1 {
 			if menzi1.Rank+menzi2.Rank+menzi3.Rank == 12 {
 				if cw.Menchin {
 					return 2, "一気通貫 2飜\n"
@@ -441,6 +464,11 @@ func OneDragon(cw win.Common_Win) (int, string) {
 func Somete(cw win.Common_Win) (int, string) {
 	var havezi bool = false
 	var suit byte = 'x'
+	if cw.Eye.Suit == 'z' {
+		havezi = true
+	} else {
+		suit = cw.Eye.Suit
+	}
 	for i := range cw.MenziList {
 		if cw.MenziList[i].Suit == 'z' {
 			havezi = true
@@ -480,14 +508,14 @@ func Yakuman_Special(cw win.Common_Win) (int, string) {
 			return 0, ""
 		}
 		yakuman_count++
-		msg += "天和 役満"
+		msg += "天和 役満\n"
 	} else if cw.JiHo {
 		if !cw.Tsumo || cw.SelfWind == 1 {
 			log.Println("error for yakuman special")
 			return 0, ""
 		}
 		yakuman_count++
-		msg += "地和 役満"
+		msg += "地和 役満\n"
 	}
 	return yakuman_count, msg
 }
@@ -663,7 +691,7 @@ func NineGates(cw win.Common_Win) (int, string) {
 func Yakuman_Check(cw win.Common_Win) (int, string) {
 	var yakuman_count int
 	var msg string
-	yakumanChecks := []func(cw win.Common_Win) (int, string){
+	yakumanChecks := []func(win.Common_Win) (int, string){
 		Yakuman_Special,
 		BigSangen,
 		FourConcealedTrp,
@@ -714,6 +742,81 @@ func CalculateYaku(cw win.Common_Win) (int, string) { // todo
 		han += curHan
 		msg += curMsg
 	}
+	if han == 0 {
+		msg = "役なし！！！\n"
+	}
+	return han, msg
+}
+func CalculateDora(cw win.Common_Win) (int, string) {
+	var han int
+	var msg string
+	log.Println("xxxxxxxxxxxxx")
+	tiles := win.ConvertWinToMap(cw)
+	log.Println("map:", tiles)
+	var dora_han int
+	for i := range cw.Motedora_suit {
+		var dora_rank uint8
+		if cw.Motedora_suit[i] == 'z' {
+			if cw.Motedora_rank[i] >= 5 {
+				if cw.Motedora_rank[i] == 7 {
+					dora_rank = 5
+				} else {
+					dora_rank = cw.Motedora_rank[i] + 1
+				}
+			} else {
+				if cw.Motedora_rank[i] == 4 {
+					dora_rank = 1
+				} else {
+					dora_rank = cw.Motedora_rank[i] + 1
+				}
+			}
+		} else {
+			if cw.Motedora_rank[i] == 9 {
+				dora_rank = 1
+			} else {
+				dora_rank = cw.Motedora_rank[i] + 1
+			}
+		}
+		dora_han += tiles[cw.Motedora_suit[i]][dora_rank]
+	}
+	if dora_han != 0 {
+		han += dora_han
+		msg += fmt.Sprintf("ドラ %v飜\n", dora_han)
+	}
+	if cw.Akadora != 0 {
+		han += cw.Akadora
+		msg += fmt.Sprintf("赤ドラ %v飜\n", cw.Akadora)
+	}
+	var uradora_han int
+	for i := range cw.Uradora_suit {
+		var dora_rank uint8
+		if cw.Uradora_suit[i] == 'z' {
+			if cw.Uradora_rank[i] >= 5 {
+				if cw.Uradora_rank[i] == 7 {
+					dora_rank = 5
+				} else {
+					dora_rank = cw.Uradora_rank[i] + 1
+				}
+			} else {
+				if cw.Uradora_rank[i] == 4 {
+					dora_rank = 1
+				} else {
+					dora_rank = cw.Uradora_rank[i] + 1
+				}
+			}
+		} else {
+			if cw.Uradora_rank[i] == 9 {
+				dora_rank = 1
+			} else {
+				dora_rank = cw.Uradora_rank[i] + 1
+			}
+		}
+		uradora_han += tiles[cw.Uradora_suit[i]][dora_rank]
+	}
 
+	if uradora_han != 0 {
+		han += uradora_han
+		msg += fmt.Sprintf("裏ドラ %v飜\n", uradora_han)
+	}
 	return han, msg
 }

@@ -31,15 +31,40 @@ type Common_Win struct {
 	JiHo  bool
 
 	Akadora       int
-	Motedora_suit byte
-	Motedora_rank uint8
+	Motedora_suit []byte
+	Motedora_rank []uint8
 
-	Uradora_suit byte
-	Uradora_rank uint8
+	Uradora_suit []byte
+	Uradora_rank []uint8
 }
 
 type Seven_Pairs_Win struct {
-	PairList [7]combination.Pair
+	PairList     [7]combination.Pair
+	Win_Com_IDX  int // 4 represents eye
+	Win_Tile_IDX int
+	Tsumo        bool
+	Menchin      bool
+	SelfWind     uint8 //1234 ESWN
+	FieldWind    uint8 //1234
+
+	//specials
+	Reach       bool
+	DoubleReach bool // Reach and Double Reach only one is true
+	RinShan     bool
+	HaiTei      bool
+	HoTei       bool
+	Ippatsu     bool
+
+	//yakuman special
+	TenHo bool
+	JiHo  bool
+
+	Akadora       int
+	Motedora_suit []byte
+	Motedora_rank []uint8
+
+	Uradora_suit []byte
+	Uradora_rank []uint8
 }
 type Thirteen_Orphans struct {
 	Repeat_Suit byte
@@ -139,9 +164,61 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 		}
 	}
 	canCreate := false
-	if len(result) != 0 {
+	len_result := len(result)
+	if len_result != 0 {
 		canCreate = true
 	}
+
+	for i := 0; i < len_result; i++ {
+		count := 0
+		for j := range result[i].MenziList {
+			if inmenzi, idx := combination.InMenziandIndex(hd.Win_Suit, hd.Win_Rank, result[i].MenziList[j]); inmenzi {
+				count++
+				if count > 1 {
+					win_copy, _ := CopyCommon(result[i])
+					win_copy.Win_Com_IDX = j
+					win_copy.Win_Tile_IDX = idx
+					if win_copy.Tsumo {
+						win_copy.MenziList[j].Furo = false
+					} else {
+						win_copy.MenziList[j].Furo = true
+					}
+					result = append(result, win_copy)
+				} else {
+					result[i].Win_Com_IDX = j
+					result[i].Win_Tile_IDX = idx
+					if result[i].Tsumo {
+						result[i].MenziList[j].Furo = false
+					} else {
+						result[i].MenziList[j].Furo = true
+					}
+				}
+			}
+		}
+		if inpair, idx := combination.InPairandIndex(hd.Win_Suit, hd.Win_Rank, result[i].Eye); inpair {
+			count++
+			if count > 1 {
+				win_copy, _ := CopyCommon(result[i])
+				win_copy.Win_Com_IDX = 4
+				win_copy.Win_Tile_IDX = idx
+				if win_copy.Tsumo {
+					win_copy.Eye.Furo = false
+				} else {
+					win_copy.Eye.Furo = true
+				}
+				result = append(result, win_copy)
+			} else {
+				result[i].Win_Com_IDX = 4
+				result[i].Win_Tile_IDX = idx
+				if result[i].Tsumo {
+					result[i].Eye.Furo = false
+				} else {
+					result[i].Eye.Furo = true
+				}
+			}
+		}
+	}
+
 	return result, canCreate
 }
 
@@ -150,8 +227,28 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 	dst.MenziList = [4]combination.Menzi{}
 	var err2 error
 	dst.Eye, _ = combination.NewPair(src.Eye.Suit, src.Eye.Rank, src.Eye.Furo)
+
+	dst.Win_Com_IDX = src.Win_Com_IDX
+	dst.Win_Tile_IDX = src.Win_Tile_IDX
 	dst.Tsumo = src.Tsumo
 	dst.Menchin = src.Menchin
+	dst.SelfWind = src.SelfWind
+	dst.FieldWind = src.FieldWind
+	dst.Reach = src.Reach
+	dst.DoubleReach = src.DoubleReach
+	dst.ChanKan = src.ChanKan
+	dst.RinShan = src.RinShan
+	dst.HaiTei = src.HaiTei
+	dst.HoTei = src.HoTei
+	dst.Ippatsu = src.Ippatsu
+	dst.TenHo = src.TenHo
+	dst.JiHo = src.JiHo
+	dst.Akadora = src.Akadora
+	dst.Motedora_suit = src.Motedora_suit
+	dst.Motedora_rank = src.Motedora_rank
+	dst.Uradora_suit = src.Uradora_suit
+	dst.Uradora_rank = src.Uradora_rank
+
 	//log.Println(dst.Eye)
 	/*if err1 != nil {
 		//panic(err1)
@@ -643,4 +740,46 @@ func GetWinningTile(cw Common_Win) (byte, uint8) {
 		rank = cw.MenziList[cw.Win_Com_IDX].Rank + addIDX
 	}
 	return suit, rank
+}
+
+func ConvertWinToMap(cw Common_Win) map[byte](map[uint8]int) {
+	log.Println("wwwwwwwwwwww")
+	result := make(map[byte](map[uint8]int))
+	log.Println("qqqqqqqqqqq")
+	log.Println("init:", result)
+	result['m'] = make(map[uint8]int)
+	result['p'] = make(map[uint8]int)
+
+	result['s'] = make(map[uint8]int)
+
+	result['z'] = make(map[uint8]int)
+
+	for i := range cw.MenziList {
+		log.Println("iiiiiiiiiii")
+		menzi := cw.MenziList[i]
+		//log.Println("popopopopo")
+		switch menzi.Type {
+		case 'S':
+			for i := 0; i < 3; i++ {
+				result[menzi.Suit][menzi.Rank+uint8(i)]++
+			}
+		case 'T':
+			result[menzi.Suit][menzi.Rank] += 3
+		case 'C', 'O':
+			result[menzi.Suit][menzi.Rank] += 4
+		}
+		log.Println("vvvvvvvvvvvvvvvv")
+	}
+	result[cw.Eye.Suit][cw.Eye.Rank] += 2
+	return result
+}
+func ConvertSevenPairsToMap(sp Seven_Pairs_Win) map[byte](map[uint8]int) {
+	result := make(map[byte](map[uint8]int))
+	for i := range sp.PairList {
+		pair := sp.PairList[i]
+
+		result[pair.Suit][pair.Rank] += 2
+	}
+
+	return result
 }

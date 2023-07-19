@@ -347,3 +347,39 @@ func SameMenzi(a Menzi, b Menzi) bool {
 	}
 	return true
 }
+func InMenziandIndex(suit byte, rank uint8, m Menzi) (bool, int) {
+	if m.Suit != suit {
+		return false, -1
+	}
+	if m.Type == 'S' {
+		idx := int(m.Rank - rank)
+		if idx < 3 && idx >= 0 {
+			return true, idx
+		}
+		return false, -1
+	}
+	if rank == m.Rank {
+		return true, 0
+	}
+	return false, -1
+}
+func InPairandIndex(suit byte, rank uint8, p Pair) (bool, int) {
+	if p.Suit != suit {
+		return false, -1
+	}
+	if rank == p.Rank {
+		return true, 0
+	}
+	return false, -1
+}
+func IsYaoMenzi(m Menzi) bool {
+	if m.Suit == 'z' {
+		return true
+	} else if m.Type == 'S' {
+		return m.Rank == 1 || m.Rank == 7
+	}
+	return m.Rank == 1 || m.Rank == 9
+}
+func IsYaoPair(p Pair) bool {
+	return (p.Suit == 'z' || p.Rank == 1 || p.Rank == 9)
+}
