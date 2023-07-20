@@ -55,14 +55,6 @@ func IsEmptyMenzi(menzi Menzi) bool {
 	return false
 }
 
-/*
-	func IsEmptyTile(tile Tile) bool {
-		if tile.Suit == 0 {
-			return true
-		}
-		return false
-	}
-*/
 func IsEmptyPair(pair Pair) bool {
 	if pair.Suit == 0 {
 		return true
@@ -70,18 +62,6 @@ func IsEmptyPair(pair Pair) bool {
 	return false
 }
 
-/*
-	func NewTile(suit byte, rank uint8) (Tile, error) {
-		if valid, err := isValid(suit, rank, 'P'); !valid { // validity same as pair
-			return Tile{}, err
-		}
-		return Tile{
-			Suit: suit,
-			Rank: rank,
-			//Furo: furo,
-		}, nil
-	}
-*/
 func NewPair(suit byte, rank uint8, furo bool) (Pair, error) {
 
 	if valid, err := isValid(suit, rank, 'P'); !valid {

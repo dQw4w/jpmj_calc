@@ -46,19 +46,12 @@ func ConvertStrToHand(str_hand string) (Hand, error) {
 	var states = [5]byte{'m', 'p', 's', 'z', 'f'} // f represents finish
 	state_idx := 0
 	out := Hand{}
-	/*out := Hand{
-		Man: make([]uint8, 0, len(str_hand)/2),
-		Pin: make([]uint8, 0, len(str_hand)/2),
-		Sou: make([]uint8, 0, len(str_hand)/2),
-		Zi:  make([]uint8, 0, len(str_hand)/2),
-	}*/
 
 	for i := range str_hand {
 
 		curbyte := str_hand[i]
 		curint := curbyte - '0'
 		curstate := states[state_idx]
-		//log.Println(curint)
 		var maxrank uint8
 		if curstate == 'z' {
 			maxrank = 7

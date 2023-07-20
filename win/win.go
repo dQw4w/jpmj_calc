@@ -128,7 +128,6 @@ type NewHandAndRemovedMenzis struct {
 	RemovedMenzis []combination.Menzi
 }
 
-// TODO: set the menzi including the win tile to furo
 func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 	var result []Common_Win
 	if !hand.IsValidHandNum(hd) {
@@ -171,7 +170,7 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 		canCreate = true
 	}
 
-	for i := 0; i < len_result; i++ {
+	for i := 0; i < len_result; i++ { // set the menzi including the win tile to furo
 		count := 0
 		for j := range result[i].MenziList {
 			if inmenzi, idx := combination.InMenziandIndex(hd.Win_Suit, hd.Win_Rank, result[i].MenziList[j]); inmenzi {
@@ -261,7 +260,7 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 
 	return dst, nil
 }
-func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
+func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) { // check if the tile of index = idx in hd can be removed as a pair with another tile
 	var mLen, pLen, sLen, zLen = hand.AllLen(hd)
 
 	if idx < mLen {
@@ -344,7 +343,8 @@ func RemoveElements(slice []uint8, a, b, c int) []uint8 {
 	}
 	return newslice
 }
-func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool) {
+func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool) { // check if the tile of index = idx in hd can be removed as a menzi with other tiles
+	//returns all posibilities
 	hd := hdmz.NewHand
 	mzlist := hdmz.RemovedMenzis
 	var possibleReturns []NewHandAndRemovedMenzis
@@ -383,7 +383,6 @@ func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool)
 				possibleReturns = append(possibleReturns, NewHandAndRemovedMenzis{NewHand: newhd, RemovedMenzis: newMenziList})
 			}
 		}
-		//TODO: finish Pin,Sou,Zi accoring to Man (the straight part of the following code is wrong)
 	} else if len(hd.Pin) != 0 {
 		if hd.Pin[0] == hd.Pin[1] && hd.Pin[1] == hd.Pin[2] {
 			trp, err := combination.NewTriplet('p', hd.Pin[0], false)
@@ -653,92 +652,6 @@ func Create13Orphans(hd hand.Hand, tsumo, oyaka, tenho, jiho bool) (Thirteen_Orp
 	return result, true
 }
 
-/*
-	func RemoveMenzi(hdmz NewHandAndRemovedMenzis) ([]NewHandAndRemovedMenzis, bool) {
-		hd := hdmz.NewHand
-		mzlist := hdmz.RemovedMenzis
-		var possibleReturns [](NewHandAndRemovedMenzis)
-		if len(hd.Man) != 0 {
-
-			if hd.Man[0] == hd.Man[1] && hd.Man[1] == hd.Man[2] { // line 184
-				trp, err := combination.NewTriplet('m', hd.Man[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Man = newhd.Man[3:]
-					newMenziList := []combination.Menzi{}
-					copy(newMenziList, mzlist)
-					newMenziList = append(newMenziList, trp)
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzis{NewHand: newhd, RemovedMenzis: newMenziList})
-				}
-			} // line 194
-			if hd.Man[1]-hd.Man[0] == 1 && hd.Man[2]-hd.Man[1] == 1 {
-				stra, err := combination.NewStraight('m', hd.Man[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Man = newhd.Man[3:]
-					newMenziList := []combination.Menzi{}
-					copy(newMenziList, mzlist)
-					newMenziList = append(newMenziList, stra)
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzis{NewHand: newhd, RemovedMenzis: newMenziList})
-				}
-			}
-			// TODO:modify the code below for Pin, Sou, Zi accoring to the if statement from Man
-		} else if len(hd.Pin) != 0 {
-			if hd.Pin[0] == hd.Pin[1] && hd.Pin[1] == hd.Pin[2] {
-				trp, err := combination.NewTriplet('p', hd.Pin[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Pin = newhd.Pin[3:] // Remove elements of index = 0, 1, 2
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzi{NewHand: newhd, RemovedMenzi: trp})
-				}
-			}
-
-			if hd.Pin[1]-hd.Pin[0] == 1 && hd.Pin[2]-hd.Pin[1] == 1 {
-				stra, err := combination.NewStraight('p', hd.Pin[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Pin = newhd.Pin[3:] // Remove elements of index = 0, 1, 2
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzi{NewHand: newhd, RemovedMenzi: stra})
-				}
-			}
-		} else if len(hd.Sou) != 0 {
-			if hd.Sou[0] == hd.Sou[1] && hd.Sou[1] == hd.Sou[2] {
-				trp, err := combination.NewTriplet('s', hd.Sou[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Sou = newhd.Sou[3:] // Remove elements of index = 0, 1, 2
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzi{NewHand: newhd, RemovedMenzi: trp})
-				}
-			}
-
-			if hd.Sou[1]-hd.Sou[0] == 1 && hd.Sou[2]-hd.Sou[1] == 1 {
-				stra, err := combination.NewStraight('s', hd.Sou[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Sou = newhd.Sou[3:] // Remove elements of index = 0, 1, 2
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzi{NewHand: newhd, RemovedMenzi: stra})
-				}
-			}
-		} else if len(hd.Zi) != 0 {
-			if hd.Zi[0] == hd.Zi[1] && hd.Zi[1] == hd.Zi[2] {
-				trp, err := combination.NewTriplet('s', hd.Zi[0])
-				if err == nil {
-					newhd := hand.Copy(hd)
-					newhd.Zi = newhd.Zi[3:] // Remove elements of index = 0, 1, 2
-					possibleReturns = append(possibleReturns, NewHandAndRemovedMenzi{NewHand: newhd, RemovedMenzi: trp})
-				}
-			}
-		}
-		//log.Println("Invalid input for RemovePair func")
-
-		canRemove := false
-		if len(possibleReturns) != 0 {
-			canRemove = true
-		}
-		return possibleReturns, canRemove
-
-}
-*/
 func CommonString(c Common_Win) string {
 	var output string
 	output += "面子:"

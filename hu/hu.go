@@ -1,4 +1,4 @@
-package hu
+package hu //符
 
 import (
 	"jpmj_calc/combination"
@@ -63,7 +63,7 @@ func CalcHu(cw win.Common_Win) int {
 		hu = 30
 	}
 	//log.Println("originalhu:", hu)
-	for hu%10 != 0 {
+	for hu%10 != 0 { //round up
 		hu++
 	}
 	return hu

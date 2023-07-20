@@ -147,7 +147,6 @@ func Pinhu(cw win.Common_Win) (int, string) { // unfinished
 
 		}
 	}
-	//TODO:if eye is yakuhai, false
 	if cw.Eye.Suit == 'z' { //Eye is yakuhai
 		if cw.Eye.Rank == cw.SelfWind || cw.Eye.Rank == cw.FieldWind || cw.Eye.Rank >= 5 {
 			//log.Println("c")
@@ -155,7 +154,6 @@ func Pinhu(cw win.Common_Win) (int, string) { // unfinished
 			return 0, ""
 		}
 	}
-	//TODO:聽牌型
 	if cw.Win_Com_IDX == 4 { //單騎
 		//log.Println("d")
 
@@ -217,8 +215,6 @@ func OnePekoandTwoPeko(cw win.Common_Win) (int, string) {
 	}
 	return han, msg
 }
-
-//TODO:dora,akarora
 
 // 2hanyaku
 func ThreeSameTrp(cw win.Common_Win) (int, string) {
@@ -498,7 +494,6 @@ func Somete(cw win.Common_Win) (int, string) {
 }
 
 // below are yakumans, the return integer value represents how many times of yakuman
-// TODO: tenho jiho
 func Yakuman_Special(cw win.Common_Win) (int, string) {
 	var yakuman_count int
 	var msg string
@@ -519,7 +514,7 @@ func Yakuman_Special(cw win.Common_Win) (int, string) {
 	}
 	return yakuman_count, msg
 }
-func BigSangen(cw win.Common_Win) (int, string) { // TODO: also modify small ,using similar logic
+func BigSangen(cw win.Common_Win) (int, string) {
 	havesangen := [3]bool{false, false, false} // white,green,red
 
 	for i := range cw.MenziList {
@@ -711,7 +706,7 @@ func Yakuman_Check(cw win.Common_Win) (int, string) {
 
 	return yakuman_count, msg
 }
-func CalculateYaku(cw win.Common_Win) (int, string) { // todo
+func CalculateYaku(cw win.Common_Win) (int, string) {
 	var han int
 	var msg string
 
