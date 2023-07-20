@@ -1,4 +1,4 @@
-package yaku_common
+package yaku_sevenpair
 
 import (
 	"fmt"
@@ -139,8 +139,8 @@ func Yakuman_Check(sp win.Seven_Pairs_Win) (int, string) {
 }
 
 func CalculateYaku(sp win.Seven_Pairs_Win) (int, string) {
-	var han int
-	var msg string
+	var han int = 2
+	var msg string = "七対子 2飜\n"
 
 	// Execute each function and accumulate the results
 	funcs := []func(win.Seven_Pairs_Win) (int, string){
@@ -156,9 +156,10 @@ func CalculateYaku(sp win.Seven_Pairs_Win) (int, string) {
 		han += curHan
 		msg += curMsg
 	}
-	if han == 0 {
-		msg = "役なし！！！\n"
-	}
+
+	dorahan, doramsg := CalculateDora(sp)
+	han += dorahan
+	msg += doramsg
 	return han, msg
 }
 func CalculateDora(sp win.Seven_Pairs_Win) (int, string) {
@@ -169,62 +170,62 @@ func CalculateDora(sp win.Seven_Pairs_Win) (int, string) {
 	var dora_han int
 	for i := range sp.Motedora_suit {
 		var dora_rank uint8
-		if cw.Motedora_suit[i] == 'z' {
-			if cw.Motedora_rank[i] >= 5 {
-				if cw.Motedora_rank[i] == 7 {
+		if sp.Motedora_suit[i] == 'z' {
+			if sp.Motedora_rank[i] >= 5 {
+				if sp.Motedora_rank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = sp.Motedora_rank[i] + 1
 				}
 			} else {
-				if cw.Motedora_rank[i] == 4 {
+				if sp.Motedora_rank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = sp.Motedora_rank[i] + 1
 				}
 			}
 		} else {
-			if cw.Motedora_rank[i] == 9 {
+			if sp.Motedora_rank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = cw.Motedora_rank[i] + 1
+				dora_rank = sp.Motedora_rank[i] + 1
 			}
 		}
-		dora_han += tiles[cw.Motedora_suit[i]][dora_rank]
+		dora_han += tiles[sp.Motedora_suit[i]][dora_rank]
 	}
 	if dora_han != 0 {
 		han += dora_han
 		msg += fmt.Sprintf("ドラ %v飜\n", dora_han)
 	}
-	if cw.Akadora != 0 {
-		han += cw.Akadora
-		msg += fmt.Sprintf("赤ドラ %v飜\n", cw.Akadora)
+	if sp.Akadora != 0 {
+		han += sp.Akadora
+		msg += fmt.Sprintf("赤ドラ %v飜\n", sp.Akadora)
 	}
 	var uradora_han int
-	for i := range cw.Motedora_suit {
+	for i := range sp.Motedora_suit {
 		var dora_rank uint8
-		if cw.Motedora_suit[i] == 'z' {
-			if cw.Motedora_rank[i] >= 5 {
-				if cw.Motedora_rank[i] == 7 {
+		if sp.Motedora_suit[i] == 'z' {
+			if sp.Motedora_rank[i] >= 5 {
+				if sp.Motedora_rank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = sp.Motedora_rank[i] + 1
 				}
 			} else {
-				if cw.Motedora_rank[i] == 4 {
+				if sp.Motedora_rank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = sp.Motedora_rank[i] + 1
 				}
 			}
 		} else {
-			if cw.Motedora_rank[i] == 9 {
+			if sp.Motedora_rank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = cw.Motedora_rank[i] + 1
+				dora_rank = sp.Motedora_rank[i] + 1
 			}
 		}
-		uradora_han += tiles[cw.Motedora_suit[i]][dora_rank]
+		uradora_han += tiles[sp.Motedora_suit[i]][dora_rank]
 	}
 	if uradora_han != 0 {
 		han += uradora_han

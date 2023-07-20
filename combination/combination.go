@@ -5,45 +5,21 @@ import (
 	"fmt"
 )
 
-type Tile struct {
-	Suit byte
-	Rank uint8
-}
 type Pair struct {
-	Suit byte
-	Rank uint8
-	Furo bool
+	Suit byte  //花色 m = 萬 p = 筒 s = 索 z = 字
+	Rank uint8 //牌的大小 字牌 : 1234=東南西北 567=白發中
+	Furo bool  //明true暗false
 }
 
 type Menzi struct {
-	Type byte // straight:S,triplet:T,kanzi_closed:C,kanzi_open:O
+	Type byte // straight:S,triplet:T,kanzi_closed:C,kanzi_open:O 順子 刻子 暗槓 明槓
 	Suit byte
-	Rank uint8
+	Rank uint8 //the rank of the smallest tile of a Menzi ex. 123m => rank = 1
 	Furo bool
-}
-type Straight struct {
-	Menzi
-	Suit byte
-	Rank uint8
-}
-type Triplet struct {
-	Menzi
-	Suit byte
-	Rank uint8
-}
-type Kanzi_closed struct {
-	Menzi
-	Suit byte
-	Rank uint8
-}
-type Kanzi_open struct {
-	Menzi
-	Suit byte
-	Rank uint8
 }
 
 func isValid(suit byte, rank uint8, whattype byte) (bool, error) {
-	switch suit {
+	switch suit { //check
 	case 'm', 'p', 's':
 		if rank > 9 {
 			return false, errors.New("Invaid rank")
@@ -78,28 +54,34 @@ func IsEmptyMenzi(menzi Menzi) bool {
 	}
 	return false
 }
-func IsEmptyTile(tile Tile) bool {
-	if tile.Suit == 0 {
-		return true
+
+/*
+	func IsEmptyTile(tile Tile) bool {
+		if tile.Suit == 0 {
+			return true
+		}
+		return false
 	}
-	return false
-}
+*/
 func IsEmptyPair(pair Pair) bool {
 	if pair.Suit == 0 {
 		return true
 	}
 	return false
 }
-func NewTile(suit byte, rank uint8) (Tile, error) {
-	if valid, err := isValid(suit, rank, 'P'); !valid { // validity same as pair
-		return Tile{}, err
+
+/*
+	func NewTile(suit byte, rank uint8) (Tile, error) {
+		if valid, err := isValid(suit, rank, 'P'); !valid { // validity same as pair
+			return Tile{}, err
+		}
+		return Tile{
+			Suit: suit,
+			Rank: rank,
+			//Furo: furo,
+		}, nil
 	}
-	return Tile{
-		Suit: suit,
-		Rank: rank,
-		//Furo: furo,
-	}, nil
-}
+*/
 func NewPair(suit byte, rank uint8, furo bool) (Pair, error) {
 
 	if valid, err := isValid(suit, rank, 'P'); !valid {
@@ -189,7 +171,7 @@ func New_Menzi(tp byte, suit byte, rank uint8, furo bool) (Menzi, error) {
 		return Menzi{}, errors.New("Invalid input for New_Menzi func")
 	}
 }
-func PairString(p Pair) string {
+func PairString(p Pair) string { // for printing and debugging
 	var output, suitstr string
 	switch p.Suit {
 	case 'm':
@@ -229,7 +211,7 @@ func PairString(p Pair) string {
 
 	return output
 }
-func MenziString(m Menzi) string {
+func MenziString(m Menzi) string { // for printing and debugging
 	var output, suitstr string
 	switch m.Suit {
 	case 'm':
@@ -289,7 +271,7 @@ func ConvertStrToMenzi(str string) (Menzi, int /*akadora*/, error) {
 	length := len(str)
 	ranks := []uint8{}
 	for i := 0; i < length-1; i++ {
-		if str[i] == '0' {
+		if str[i] == '0' { // converts 0 to 5, and add to akadora count
 			akadora++
 			ranks = append(ranks, 5)
 		} else if str[i]-'0' <= 9 {
@@ -347,12 +329,15 @@ func SameMenzi(a Menzi, b Menzi) bool {
 	}
 	return true
 }
+func SamePair(a Pair, b Pair) bool {
+	return (a.Rank == b.Rank && a.Suit == b.Suit)
+}
 func InMenziandIndex(suit byte, rank uint8, m Menzi) (bool, int) {
 	if m.Suit != suit {
 		return false, -1
 	}
 	if m.Type == 'S' {
-		idx := int(m.Rank - rank)
+		idx := int(rank - m.Rank)
 		if idx < 3 && idx >= 0 {
 			return true, idx
 		}
@@ -372,7 +357,7 @@ func InPairandIndex(suit byte, rank uint8, p Pair) (bool, int) {
 	}
 	return false, -1
 }
-func IsYaoMenzi(m Menzi) bool {
+func IsYaoMenzi(m Menzi) bool { // YaoTile : tile rank == 1,9 or suit = 'z', YaoMenzi: a menzi includes at least one YaoTile
 	if m.Suit == 'z' {
 		return true
 	} else if m.Type == 'S' {

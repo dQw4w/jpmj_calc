@@ -4,7 +4,6 @@ import (
 	"errors"
 	"jpmj_calc/combination"
 	"jpmj_calc/hand"
-	"log"
 )
 
 type Common_Win struct {
@@ -39,13 +38,12 @@ type Common_Win struct {
 }
 
 type Seven_Pairs_Win struct {
-	PairList     [7]combination.Pair
-	Win_Com_IDX  int // 4 represents eye
-	Win_Tile_IDX int
-	Tsumo        bool
-	Menchin      bool
-	SelfWind     uint8 //1234 ESWN
-	FieldWind    uint8 //1234
+	PairList    [7]combination.Pair
+	Win_Com_IDX int
+	Tsumo       bool
+	Menchin     bool
+	SelfWind    uint8 //1234 ESWN
+	FieldWind   uint8 //1234
 
 	//specials
 	Reach       bool
@@ -67,13 +65,23 @@ type Seven_Pairs_Win struct {
 	Uradora_rank []uint8
 }
 type Thirteen_Orphans struct {
-	Repeat_Suit byte
-	Repeat_Rank uint8
+	Repeat_Suit   byte
+	Repeat_Rank   uint8
+	Thirteen_Wait bool
+
+	Tsumo bool
+	Oyaka bool
+	TenHo bool
+	JiHo  bool
 }
 
 func CreateEmptyCommon() Common_Win {
 	New := Common_Win{}
 	//New.MenziList = [4]combination.Menzi{}
+	return New
+}
+func CreateEmptySevenPair() Seven_Pairs_Win {
+	New := Seven_Pairs_Win{}
 	return New
 }
 func AddMenzi(menzi combination.Menzi, common Common_Win) (Common_Win, error) {
@@ -105,6 +113,9 @@ func Menzi_Count(common Common_Win) int {
 func AddPair(pair combination.Pair, sevenpairwin Seven_Pairs_Win) (Seven_Pairs_Win, error) {
 	for i := range sevenpairwin.PairList {
 		if combination.IsEmptyPair(sevenpairwin.PairList[i]) {
+			if i != 0 && combination.SamePair(sevenpairwin.PairList[i-1], pair) {
+				return sevenpairwin, errors.New("Error: repeated pair")
+			}
 			sevenpairwin.PairList[i] = pair
 			return sevenpairwin, nil
 		}
@@ -129,32 +140,23 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 	for i := 0; i < hand.Len(hd); i++ { // checks from the first tile to the second-to-last
 		newhd, pair, valid := RemovePair(hd, i)
 		if valid {
-			//log.Println(newhd)
-			//log.Println(pair)
 
 			NewWin := Common_Win{}
 			NewWin, _ = CopyCommon(cw)
-			log.Println("Newwin:", NewWin)
+			//log.Println("Newwin:", NewWin)
 			NewWin, _ = SetPair(pair, NewWin)
 			possibles := []NewHandAndRemovedMenzis{NewHandAndRemovedMenzis{NewHand: newhd}}
-			//log.Println(NewWin)
-			/*hel, _ := combination.NewStraight('s', 1)
-			possibles[0].RemovedMenzis = append(possibles[0].RemovedMenzis, hel)
-			log.Println("hi")
-			log.Println(possibles)*/
+
 			for i := 0; i < 4-Menzi_Count(cw); i++ {
 				cases := len(possibles)
 				for j := 0; j < cases; j++ {
-					//log.Println("case to remove:", possibles[0])
 					newPossibilities, _ := RemoveMenzi(possibles[0])
 					possibles = append(possibles[1:], newPossibilities...)
 				}
 			}
-			//log.Println("possibles:", possibles)
 
 			for i := range possibles {
 				NewNewWin, _ := CopyCommon(NewWin)
-				//log.Println("i:", i)
 				for j := range possibles[i].RemovedMenzis {
 					NewNewWin, _ = AddMenzi(possibles[i].RemovedMenzis[j], NewNewWin)
 				}
@@ -249,11 +251,6 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 	dst.Uradora_suit = src.Uradora_suit
 	dst.Uradora_rank = src.Uradora_rank
 
-	//log.Println(dst.Eye)
-	/*if err1 != nil {
-		//panic(err1)
-		return Common_Win{}, err1
-	}*/
 	for i := range dst.MenziList {
 		dst.MenziList[i], err2 = combination.New_Menzi(src.MenziList[i].Type, src.MenziList[i].Suit, src.MenziList[i].Rank, src.MenziList[i].Furo)
 		if err2 != nil {
@@ -261,15 +258,12 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 			return dst, err2
 		}
 	}
-	//log.Print("hi")
-	//log.Println(dst)
+
 	return dst, nil
 }
 func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 	var mLen, pLen, sLen, zLen = hand.AllLen(hd)
-	//log.Print("hd before rmpair func:")
-	//log.Println(hd)
-	//log.Printf("idx=%v\n", idx)
+
 	if idx < mLen {
 		if len(hd.Man)%3 != 2 {
 			return hand.Hand{}, combination.Pair{}, false
@@ -277,14 +271,11 @@ func RemovePair(hd hand.Hand, idx int) (hand.Hand, combination.Pair, bool) {
 		if mLen > idx+1 && hd.Man[idx] == hd.Man[idx+1] {
 			pair, err := combination.NewPair('m', hd.Man[idx], false)
 
-			//log.Printf("newpairm = %v\n", hd.Man[idx])
 			if err == nil {
 				newhd := hand.Copy(hd)
-				//fmt.Printf("newhdbefore:%v\n", newhd)
-				//newhd.Man = make([]uint8, 0, 0)
+
 				newhd.Man = append(newhd.Man[:idx], newhd.Man[idx+2:]...) //remove elements of index = idx, idx+1
-				//log.Print("hd after rmpair func:")
-				//log.Println(hd)
+
 				return newhd, pair, true
 			}
 		}
@@ -509,9 +500,9 @@ func is3dup(hd hand.Hand) bool {
 	return false
 
 }
-func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
+func CreateSevenPair(hd hand.Hand, sp Seven_Pairs_Win) (Seven_Pairs_Win, bool) {
 
-	var result Seven_Pairs_Win
+	result := CopySevenPair(sp)
 	if is3dup(hd) {
 		return Seven_Pairs_Win{}, false
 	}
@@ -550,9 +541,48 @@ func CreateSevenPair(hd hand.Hand) (Seven_Pairs_Win, bool) {
 		}
 	}
 
+	for i := range result.PairList {
+		if hd.Win_Rank == result.PairList[i].Rank && hd.Win_Suit == result.PairList[i].Suit {
+			result.Win_Com_IDX = i
+			break
+		}
+	}
 	return result, true
 
 }
+func CopySevenPair(sp Seven_Pairs_Win) Seven_Pairs_Win {
+	new := Seven_Pairs_Win{
+		Win_Com_IDX:   sp.Win_Com_IDX,
+		Tsumo:         sp.Tsumo,
+		Menchin:       sp.Menchin,
+		SelfWind:      sp.SelfWind,
+		FieldWind:     sp.FieldWind,
+		Reach:         sp.Reach,
+		DoubleReach:   sp.DoubleReach,
+		RinShan:       sp.RinShan,
+		HaiTei:        sp.HaiTei,
+		HoTei:         sp.HoTei,
+		Ippatsu:       sp.Ippatsu,
+		TenHo:         sp.TenHo,
+		JiHo:          sp.JiHo,
+		Akadora:       sp.Akadora,
+		Motedora_suit: make([]byte, len(sp.Motedora_suit)),
+		Motedora_rank: make([]uint8, len(sp.Motedora_rank)),
+		Uradora_suit:  make([]byte, len(sp.Uradora_suit)),
+		Uradora_rank:  make([]uint8, len(sp.Uradora_rank)),
+	}
+
+	copy(new.Motedora_suit, sp.Motedora_suit)
+	copy(new.Motedora_rank, sp.Motedora_rank)
+	copy(new.Uradora_suit, sp.Uradora_suit)
+	copy(new.Uradora_rank, sp.Uradora_rank)
+
+	new.PairList = [7]combination.Pair{}
+	copy(new.PairList[:], sp.PairList[:])
+
+	return new
+}
+
 func OnlyYao_Slice(tiles []uint8) bool {
 	for i := range tiles {
 		if tiles[i] != 1 && tiles[i] != 9 {
@@ -561,7 +591,7 @@ func OnlyYao_Slice(tiles []uint8) bool {
 	}
 	return true
 }
-func Create13Orphans(hd hand.Hand) (Thirteen_Orphans, bool) {
+func Create13Orphans(hd hand.Hand, tsumo, oyaka, tenho, jiho bool) (Thirteen_Orphans, bool) {
 	if hand.Len(hd) != 14 {
 		return Thirteen_Orphans{}, false
 	}
@@ -613,6 +643,13 @@ func Create13Orphans(hd hand.Hand) (Thirteen_Orphans, bool) {
 			repeat_count++
 		}
 	}
+	if result.Repeat_Rank == hd.Win_Rank && result.Repeat_Suit == hd.Win_Suit {
+		result.Thirteen_Wait = true
+	}
+	result.Tsumo = tsumo
+	result.Oyaka = oyaka
+	result.TenHo = tenho
+	result.JiHo = jiho
 	return result, true
 }
 
@@ -743,10 +780,10 @@ func GetWinningTile(cw Common_Win) (byte, uint8) {
 }
 
 func ConvertWinToMap(cw Common_Win) map[byte](map[uint8]int) {
-	log.Println("wwwwwwwwwwww")
+	//log.Println("wwwwwwwwwwww")
 	result := make(map[byte](map[uint8]int))
-	log.Println("qqqqqqqqqqq")
-	log.Println("init:", result)
+	//log.Println("qqqqqqqqqqq")
+	//log.Println("init:", result)
 	result['m'] = make(map[uint8]int)
 	result['p'] = make(map[uint8]int)
 
@@ -755,7 +792,7 @@ func ConvertWinToMap(cw Common_Win) map[byte](map[uint8]int) {
 	result['z'] = make(map[uint8]int)
 
 	for i := range cw.MenziList {
-		log.Println("iiiiiiiiiii")
+		//log.Println("iiiiiiiiiii")
 		menzi := cw.MenziList[i]
 		//log.Println("popopopopo")
 		switch menzi.Type {
@@ -768,13 +805,19 @@ func ConvertWinToMap(cw Common_Win) map[byte](map[uint8]int) {
 		case 'C', 'O':
 			result[menzi.Suit][menzi.Rank] += 4
 		}
-		log.Println("vvvvvvvvvvvvvvvv")
+		//log.Println("vvvvvvvvvvvvvvvv")
 	}
 	result[cw.Eye.Suit][cw.Eye.Rank] += 2
 	return result
 }
 func ConvertSevenPairsToMap(sp Seven_Pairs_Win) map[byte](map[uint8]int) {
 	result := make(map[byte](map[uint8]int))
+	result['m'] = make(map[uint8]int)
+	result['p'] = make(map[uint8]int)
+
+	result['s'] = make(map[uint8]int)
+
+	result['z'] = make(map[uint8]int)
 	for i := range sp.PairList {
 		pair := sp.PairList[i]
 
@@ -782,4 +825,36 @@ func ConvertSevenPairsToMap(sp Seven_Pairs_Win) map[byte](map[uint8]int) {
 	}
 
 	return result
+}
+func ConvertCommonToSeven(cw Common_Win) Seven_Pairs_Win {
+	//TODO: copy the elements that Common_Win and Seven_Pairs_Win have in common, from cw into a new Seven_Pairs_Win, and return the Seven_Pairs_Win
+
+	sp := Seven_Pairs_Win{
+		Win_Com_IDX:   cw.Win_Com_IDX,
+		Tsumo:         cw.Tsumo,
+		Menchin:       cw.Menchin,
+		SelfWind:      cw.SelfWind,
+		FieldWind:     cw.FieldWind,
+		Reach:         cw.Reach,
+		DoubleReach:   cw.DoubleReach,
+		RinShan:       cw.RinShan,
+		HaiTei:        cw.HaiTei,
+		HoTei:         cw.HoTei,
+		Ippatsu:       cw.Ippatsu,
+		TenHo:         cw.TenHo,
+		JiHo:          cw.JiHo,
+		Akadora:       cw.Akadora,
+		Motedora_suit: make([]byte, len(cw.Motedora_suit)),
+		Motedora_rank: make([]uint8, len(cw.Motedora_rank)),
+		Uradora_suit:  make([]byte, len(cw.Uradora_suit)),
+		Uradora_rank:  make([]uint8, len(cw.Uradora_rank)),
+	}
+
+	copy(sp.Motedora_suit, cw.Motedora_suit)
+	copy(sp.Motedora_rank, cw.Motedora_rank)
+	copy(sp.Uradora_suit, cw.Uradora_suit)
+	copy(sp.Uradora_rank, cw.Uradora_rank)
+
+	return sp
+
 }

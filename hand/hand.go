@@ -3,7 +3,6 @@ package hand
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Hand struct {
@@ -113,7 +112,7 @@ func AppendOne(hd Hand, str_mj string) (Hand, error) {
 			return hd, errors.New("Error: invalid input for AppendOne func")
 		}
 		hd.Zi = append(hd.Zi, rk)
-		log.Println("hd zi after:", hd.Zi)
+		//log.Println("hd zi after:", hd.Zi)
 	}
 	hd.Win_Suit = str_mj[1]
 	hd.Win_Rank = rk

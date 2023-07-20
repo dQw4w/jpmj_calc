@@ -750,9 +750,9 @@ func CalculateYaku(cw win.Common_Win) (int, string) { // todo
 func CalculateDora(cw win.Common_Win) (int, string) {
 	var han int
 	var msg string
-	log.Println("xxxxxxxxxxxxx")
+	//log.Println("xxxxxxxxxxxxx")
 	tiles := win.ConvertWinToMap(cw)
-	log.Println("map:", tiles)
+	//log.Println("map:", tiles)
 	var dora_han int
 	for i := range cw.Motedora_suit {
 		var dora_rank uint8
