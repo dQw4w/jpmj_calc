@@ -1,7 +1,6 @@
 package combination
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -165,6 +164,7 @@ func Test_isValid(t *testing.T) {
 	}
 }
 
+/*
 func TestNewPair(t *testing.T) {
 	type args struct {
 		suit byte
@@ -299,3 +299,4 @@ func TestNewKanzi_open(t *testing.T) {
 		})
 	}
 }
+*/

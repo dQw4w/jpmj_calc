@@ -46,20 +46,36 @@ func MenchinTsumo(cw win.Common_Win) (int, string) {
 	return 1, "門前清自摸和 1飜\n"
 }
 func Tanyao(cw win.Common_Win) (int, string) {
-	if cw.Eye.Suit == 'z' || cw.Eye.Rank == 1 || cw.Eye.Rank == 9 {
+	/*if cw.Eye.Suit == 'z' || cw.Eye.Rank == 1 || cw.Eye.Rank == 9 {
+		return 0, ""
+	}*/
+	if combination.IsYaoPair(cw.Eye) {
 		return 0, ""
 	}
-	for i := range cw.MenziList {
-		menzi := cw.MenziList[i]
-		if menzi.Type == 'S' {
-			if menzi.Rank == 1 || menzi.Rank == 7 {
-				return 0, ""
-			}
-		} else {
-			if menzi.Suit == 'z' || menzi.Rank == 1 || menzi.Rank == 9 {
-				return 0, ""
-			}
+	for _, menzi := range cw.MenziList {
+		//menzi := cw.MenziList[i]
+		if combination.IsYaoMenzi(menzi) {
+			return 0, ""
 		}
+		/*switch menzi.Type{
+			case 'S':
+				switch menzi.Rank{
+				case '1','7':
+					return 0,""
+				}
+			default:
+
+			}
+			if menzi.Type == 'S' {
+				if menzi.Rank == 1 || menzi.Rank == 7 {
+					return 0, ""
+				}
+			} else {
+				if menzi.Suit == 'z' || menzi.Rank == 1 || menzi.Rank == 9 {
+					return 0, ""
+				}
+			}
+		}*/
 	}
 	return 1, "断么九　1飜\n"
 }
@@ -706,12 +722,12 @@ func Yakuman_Check(cw win.Common_Win) (int, string) {
 
 	return yakuman_count, msg
 }
-func CalculateYaku(cw win.Common_Win) (int, string) {
+func CalculateYaku(cw win.Common_Win) (int, string) { //役種
 	var han int
 	var msg string
 
 	// Execute each function and accumulate the results
-	funcs := []func(win.Common_Win) (int, string){
+	funcs := []func(win.Common_Win) (int, string){ //所有一般型可能的役種
 		Non_Yakuman_Special,
 		MenchinTsumo,
 		Tanyao,
@@ -738,16 +754,14 @@ func CalculateYaku(cw win.Common_Win) (int, string) {
 		msg += curMsg
 	}
 	if han == 0 {
-		msg = "役なし！！！\n"
+		msg = "役なし！！！\n" //無役
 	}
 	return han, msg
 }
-func CalculateDora(cw win.Common_Win) (int, string) {
+func CalculateDora(cw win.Common_Win) (int, string) { //寶牌
 	var han int
 	var msg string
-	//log.Println("xxxxxxxxxxxxx")
 	tiles := win.ConvertWinToMap(cw)
-	//log.Println("map:", tiles)
 	var dora_han int
 	for i := range cw.Motedora_suit {
 		var dora_rank uint8

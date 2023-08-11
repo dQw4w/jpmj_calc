@@ -62,7 +62,6 @@ func CalcHu(cw win.Common_Win) int {
 	if !cw.Menchin && hu < 30 { //at least 30 if not menchin pinfu tsumo
 		hu = 30
 	}
-	//log.Println("originalhu:", hu)
 	for hu%10 != 0 { //round up
 		hu++
 	}
