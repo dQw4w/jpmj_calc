@@ -6,12 +6,12 @@ import (
 )
 
 type Hand struct {
-	Man      []uint8
-	Pin      []uint8
-	Sou      []uint8
-	Zi       []uint8
-	Win_Suit byte
-	Win_Rank uint8
+	Man      []uint8 //萬
+	Pin      []uint8 //筒
+	Sou      []uint8 //索
+	Zi       []uint8 //字
+	Win_Suit byte    //和了牌的花色
+	Win_Rank uint8   //和了牌的大小
 }
 
 func Len(hand Hand) int {
@@ -35,10 +35,9 @@ func Copy(src Hand) Hand {
 	return dst
 }
 func IsEmptyHand(hand Hand) bool {
-	if Len(hand) == 0 {
-		return true
-	}
-	return false
+
+	return Len(hand) == 0
+
 }
 
 func ConvertStrToHand(str_hand string) (Hand, error) {
@@ -74,14 +73,14 @@ func ConvertStrToHand(str_hand string) (Hand, error) {
 					return Hand{}, errors.New(msg)
 				}
 			case 'f':
-				return Hand{}, errors.New("Extra letters behind z")
+				return Hand{}, errors.New("extra letters behind z")
 			}
 			continue
 		}
 		if curbyte == curstate {
 			state_idx++
 		} else {
-			msg := fmt.Sprintf("Invalid input at %s", string(curbyte))
+			msg := fmt.Sprintf("invalid input at %s", string(curbyte))
 			return Hand{}, errors.New(msg)
 		}
 
@@ -91,7 +90,7 @@ func ConvertStrToHand(str_hand string) (Hand, error) {
 func AppendOne(hd Hand, str_mj string) (Hand, error) {
 	var rk uint8 = str_mj[0] - '0'
 	if len(str_mj) != 2 || rk > 9 {
-		return hd, errors.New("Error: invalid input for AppendOne func")
+		return hd, errors.New("error: invalid input for AppendOne func")
 	}
 	switch str_mj[1] {
 	case 'm':
@@ -102,7 +101,7 @@ func AppendOne(hd Hand, str_mj string) (Hand, error) {
 		hd.Sou = append(hd.Sou, rk)
 	case 'z':
 		if rk > 7 || rk == 0 {
-			return hd, errors.New("Error: invalid input for AppendOne func")
+			return hd, errors.New("error: invalid input for AppendOne func")
 		}
 		hd.Zi = append(hd.Zi, rk)
 		//log.Println("hd zi after:", hd.Zi)

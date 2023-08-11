@@ -5,24 +5,24 @@ import (
 	"math"
 )
 
-func calcBscPt(han, fu int) int {
+func calcBscPt(han /*飜*/, fu /*符*/ int) int {
 	basicPt := 0
-	if han <= 4 {
-		basicPt = fu * int(math.Pow(2, float64(han+2)))
+	if han <= 4 { //四翻以下的情況
+		basicPt = fu * int(math.Pow(2, float64(han+2))) // 符 * 2 ^(飜+2)
 		if basicPt > 2000 {
-			basicPt = 2000
+			basicPt = 2000 //滿貫，子8000親12000
 		}
-	} else {
-		switch han {
-		case 5:
+	} else { //五飜以上的情況，不用考慮符數
+		switch han /*飜*/ {
+		case 5: //滿貫，子8000親12000
 			basicPt = 2000
-		case 6, 7:
+		case 6, 7: //跳滿，子12000親18000
 			basicPt = 3000
-		case 8, 9, 10:
+		case 8, 9, 10: //倍滿，子16000親24000
 			basicPt = 4000
-		case 11, 12:
+		case 11, 12: //三倍滿，子24000親36000
 			basicPt = 6000
-		default:
+		default /*飜數>=13*/ : //累計役滿，子32000親48000
 			basicPt = 8000
 		}
 	}

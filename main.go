@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	handstr := "12345678mps11122z" //TODO:enter the concealed tiles (discluding 暗槓, 和了牌) here
+	handstr := "12340678mps11122z" //TODO:enter the concealed tiles (discluding 暗槓, 和了牌) here
 	a, err := hand.ConvertStrToHand(handstr)
 	if err != nil {
 		log.Panic(err)
@@ -33,10 +33,10 @@ func main() {
 	tempwin.SelfWind = 1
 	tempwin.FieldWind = 1
 	//tempwin.Ippatsu = true
-	tempwin.Motedora_rank = append(tempwin.Motedora_rank, 2)
-	tempwin.Motedora_suit = append(tempwin.Motedora_suit, 'p')
-	//tempwin.Uradora_rank = append(tempwin.Uradora_rank, 5)
-	//tempwin.Uradora_suit = append(tempwin.Uradora_suit, 's')
+	tempwin.Motedora_rank = append(tempwin.Motedora_rank, 4)
+	tempwin.Motedora_suit = append(tempwin.Motedora_suit, 'z')
+	tempwin.Uradora_rank = append(tempwin.Uradora_rank, 1)
+	tempwin.Uradora_suit = append(tempwin.Uradora_suit, 'z')
 	//tempwin.RinShan = true
 	//tempwin.ChanKan = true
 

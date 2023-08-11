@@ -6,7 +6,7 @@ import (
 	"jpmj_calc/hand"
 )
 
-type Common_Win struct {
+type Common_Win struct { //一般型
 	MenziList    [4]combination.Menzi
 	Eye          combination.Pair
 	Win_Com_IDX  int // 4 represents eye
@@ -37,7 +37,7 @@ type Common_Win struct {
 	Uradora_rank []uint8
 }
 
-type Seven_Pairs_Win struct {
+type Seven_Pairs_Win struct { //七對子型
 	PairList    [7]combination.Pair
 	Win_Com_IDX int
 	Tsumo       bool
@@ -64,7 +64,7 @@ type Seven_Pairs_Win struct {
 	Uradora_suit []byte
 	Uradora_rank []uint8
 }
-type Thirteen_Orphans struct {
+type Thirteen_Orphans struct { //國士無雙型
 	Repeat_Suit   byte
 	Repeat_Rank   uint8
 	Thirteen_Wait bool
@@ -91,7 +91,7 @@ func AddMenzi(menzi combination.Menzi, common Common_Win) (Common_Win, error) {
 			return common, nil
 		}
 	}
-	return common, errors.New("Error: Menzilist is already full")
+	return common, errors.New("error: Menzilist is already full")
 }
 func SetPair(pair combination.Pair, common Common_Win) (Common_Win, error) {
 	common.Eye = pair
@@ -114,13 +114,13 @@ func AddPair(pair combination.Pair, sevenpairwin Seven_Pairs_Win) (Seven_Pairs_W
 	for i := range sevenpairwin.PairList {
 		if combination.IsEmptyPair(sevenpairwin.PairList[i]) {
 			if i != 0 && combination.SamePair(sevenpairwin.PairList[i-1], pair) {
-				return sevenpairwin, errors.New("Error: repeated pair")
+				return sevenpairwin, errors.New("error: repeated pair")
 			}
 			sevenpairwin.PairList[i] = pair
 			return sevenpairwin, nil
 		}
 	}
-	return sevenpairwin, errors.New("Error: Pairlist is already full")
+	return sevenpairwin, errors.New("error: pairlist is already full")
 }
 
 type NewHandAndRemovedMenzis struct {
@@ -140,11 +140,11 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 		newhd, pair, valid := RemovePair(hd, i)
 		if valid {
 
-			NewWin := Common_Win{}
-			NewWin, _ = CopyCommon(cw)
+			//NewWin := Common_Win{}
+			NewWin, _ := CopyCommon(cw)
 			//log.Println("Newwin:", NewWin)
 			NewWin, _ = SetPair(pair, NewWin)
-			possibles := []NewHandAndRemovedMenzis{NewHandAndRemovedMenzis{NewHand: newhd}}
+			possibles := []NewHandAndRemovedMenzis{ /*NewHandAndRemovedMenzis*/ {NewHand: newhd}}
 
 			for i := 0; i < 4-Menzi_Count(cw); i++ {
 				cases := len(possibles)
