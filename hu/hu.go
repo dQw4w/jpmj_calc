@@ -7,8 +7,8 @@ import (
 
 func CalcHu(cw win.Common_Win) int {
 	hu := 20
-	for i := range cw.MenziList { // dealing with trp,kanzi
-		menzi := cw.MenziList[i]
+	for _, menzi := range cw.MenziList { // dealing with trp,kanzi
+		//menzi := cw.MenziList[i]
 		if menzi.Type != 'S' {
 			trphu := 2
 			if combination.IsYaoMenzi(menzi) {
