@@ -14,7 +14,7 @@ type Hand struct {
 	Win_Rank uint8   //和了牌的大小
 }
 
-func Len(hand Hand) int {
+func Len(hand Hand) int { //牌數
 	return len(hand.Man) + len(hand.Pin) + len(hand.Sou) + len(hand.Zi)
 }
 func AllLen(hand Hand) (int, int, int, int) {
