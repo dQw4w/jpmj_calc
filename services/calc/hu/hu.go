@@ -1,8 +1,8 @@
 package hu //符
 
 import (
-	"jpmj_calc/combination"
-	"jpmj_calc/win"
+	"github.com/dQw4w/jpmj_calc/services/calc/combination"
+	"github.com/dQw4w/jpmj_calc/services/calc/win"
 )
 
 func CalcHu(cw win.Common_Win) int {
@@ -35,22 +35,22 @@ func CalcHu(cw win.Common_Win) int {
 			}
 		}
 	}
-	if cw.Win_Tile_IDX == 1 { //middle win
+	if cw.WinTileIDX == 1 { //middle win
 		hu += 2
 	}
-	if cw.Win_Tile_IDX == 0 { //"7"89
-		if cw.Win_Com_IDX != 4 {
-			if cw.MenziList[cw.Win_Com_IDX].Type == 'S' && cw.MenziList[cw.Win_Com_IDX].Rank == 7 {
+	if cw.WinTileIDX == 0 { //"7"89
+		if cw.WinComIDX != 4 {
+			if cw.MenziList[cw.WinComIDX].Type == 'S' && cw.MenziList[cw.WinComIDX].Rank == 7 {
 				hu += 2
 			}
 		}
 	}
-	if cw.Win_Tile_IDX == 2 { //12"3"
-		if cw.MenziList[cw.Win_Com_IDX].Type == 'S' && cw.MenziList[cw.Win_Com_IDX].Rank == 1 {
+	if cw.WinTileIDX == 2 { //12"3"
+		if cw.MenziList[cw.WinComIDX].Type == 'S' && cw.MenziList[cw.WinComIDX].Rank == 1 {
 			hu += 2
 		}
 	}
-	if cw.Win_Tile_IDX == 4 { //tanki
+	if cw.WinTileIDX == 4 { //tanki
 		hu += 2
 	}
 	if cw.Tsumo && !cw.Menchin { //tsumo
@@ -62,8 +62,9 @@ func CalcHu(cw win.Common_Win) int {
 	if !cw.Menchin && hu < 30 { //at least 30 if not menchin pinfu tsumo
 		hu = 30
 	}
-	for hu%10 != 0 { //round up
-		hu++
-	}
+	// for hu%10 != 0 { //round up
+	// 	hu++
+	// }
+	hu = (hu + 9) / 10 * 10 // round up
 	return hu
 }

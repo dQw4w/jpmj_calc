@@ -2,6 +2,90 @@
 <html>
 
 <head>
+    <title>Calculator</title>
+</head>
+
+<body>
+    <form action="/calc" method="GET">
+        <label for="hand">Hand:</label>
+        <input type="text" id="hand" name="hand" required><br>
+
+        <label for="akarehai">Akarehai:</label>
+        <input type="text" id="akarehai" name="akarehai" required><br>
+
+        <label for="furo">Furo:</label>
+        <input type="text" id="furo" name="furo[]" multiple><br>
+
+        <label for="self_wind">Self Wind:</label>
+        <select id="self_wind" name="self_wind" required>
+            <option value="1">East</option>
+            <option value="2">South</option>
+            <option value="3">West</option>
+            <option value="4">North</option>
+        </select><br>
+
+        <label for="field_wind">Field Wind:</label>
+        <select id="field_wind" name="field_wind" required>
+            <option value="1">East</option>
+            <option value="2">South</option>
+            <option value="3">West</option>
+            <option value="4">North</option>
+        </select><br>
+
+        <label for="tsumo">Tsumo:</label>
+        <input type="checkbox" id="tsumo" name="tsumo"><br>
+
+        <label for="menchin">Menchin:</label>
+        <input type="checkbox" id="menchin" name="menchin"><br>
+
+        <label for="reach">Reach:</label>
+        <input type="checkbox" id="reach" name="reach"><br>
+
+        <label for="double_reach">Double Reach:</label>
+        <input type="checkbox" id="double_reach" name="double_reach"><br>
+
+        <label for="chankan">ChanKan:</label>
+        <input type="checkbox" id="chankan" name="chankan"><br>
+
+        <label for="rinshan">RinShan:</label>
+        <input type="checkbox" id="rinshan" name="rinshan"><br>
+
+        <label for="haitei">HaiTei:</label>
+        <input type="checkbox" id="haitei" name="haitei"><br>
+
+        <label for="hotei">HoTei:</label>
+        <input type="checkbox" id="hotei" name="hotei"><br>
+
+        <label for="ippatsu">Ippatsu:</label>
+        <input type="checkbox" id="ippatsu" name="ippatsu"><br>
+
+        <label for="tenho">TenHo:</label>
+        <input type="checkbox" id="tenho" name="tenho"><br>
+
+        <label for="jiho">JiHo:</label>
+        <input type="checkbox" id="jiho" name="jiho"><br>
+
+        <label for="motedora_suit">Motedora Suit:</label>
+        <input type="text" id="motedora_suit" name="motedora_suit[]" multiple><br>
+
+        <label for="motedora_rank">Motedora Rank:</label>
+        <input type="text" id="motedora_rank" name="motedora_rank[]" multiple><br>
+
+        <label for="uradora_suit">Uradora Suit:</label>
+        <input type="text" id="uradora_suit" name="uradora_suit[]" multiple><br>
+
+        <label for="uradora_rank">Uradora Rank:</label>
+        <input type="text" id="uradora_rank" name="uradora_rank[]" multiple><br>
+
+        <input type="submit" value="Calculate">
+    </form>
+</body>
+
+</html>
+
+<!-- <html>
+
+<head>
     <title>String Processing</title>
 </head>
 
@@ -17,4 +101,4 @@
     <script src="script.js"></script>
 </body>
 
-</html>
+</html> -->

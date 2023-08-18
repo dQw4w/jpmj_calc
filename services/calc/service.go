@@ -1,24 +1,33 @@
-package main
+package calc
 
 import (
-	"jpmj_calc/combination"
-	"jpmj_calc/hand"
-	"jpmj_calc/hu"
-	"jpmj_calc/score"
-	"jpmj_calc/win"
-	"jpmj_calc/yaku_common"
-
-	"jpmj_calc/yaku_sevenpair"
 	"log"
+
+	"github.com/dQw4w/jpmj_calc/services/calc/combination"
+	"github.com/dQw4w/jpmj_calc/services/calc/hand"
+	"github.com/dQw4w/jpmj_calc/services/calc/hu"
+	"github.com/dQw4w/jpmj_calc/services/calc/score"
+	"github.com/dQw4w/jpmj_calc/services/calc/win"
+	"github.com/dQw4w/jpmj_calc/services/calc/yaku_common"
+	"github.com/dQw4w/jpmj_calc/services/calc/yaku_sevenpair"
 )
 
-func calc(handstr string, furolist []string, tempwin win.Common_Win) {
+type CalculateService struct {
+}
+
+func NewCalculateService() *CalculateService {
+	new := CalculateService{}
+	return &new
+}
+
+func (s *CalculateService) Calculate(handstr string, akarehai string, furolist []string, tempwin win.Common_Win) string {
+	output := ""
 	//handstr := "12340678mps11122z" //TODO:enter the concealed tiles (discluding 暗槓, 和了牌) here
 	a, err := hand.ConvertStrToHand(handstr)
 	if err != nil {
 		log.Panic(err)
 	}
-	a, _ = hand.AppendOne(a, "9m") //TODO: enter 和了牌 (winning tile)
+	a, _ = hand.AppendOne(a, akarehai) //TODO: enter 和了牌 (winning tile)
 	if hand.Len(a)%3 != 2 {
 		panic("no!")
 	}
@@ -33,10 +42,10 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 	// tempwin.SelfWind = 1
 	// tempwin.FieldWind = 1
 	// //tempwin.Ippatsu = true
-	// tempwin.Motedora_rank = append(tempwin.Motedora_rank, 4)
-	// tempwin.Motedora_suit = append(tempwin.Motedora_suit, 'z')
-	// tempwin.Uradora_rank = append(tempwin.Uradora_rank, 1)
-	// tempwin.Uradora_suit = append(tempwin.Uradora_suit, 'z')
+	// tempwin.MotedoraRank = append(tempwin.MotedoraRank, 4)
+	// tempwin.MotedoraSuit = append(tempwin.MotedoraSuit, 'z')
+	// tempwin.UradoraRank = append(tempwin.UradoraRank, 1)
+	// tempwin.UradoraSuit = append(tempwin.UradoraSuit, 'z')
 	//tempwin.RinShan = true
 	//tempwin.ChanKan = true
 
@@ -58,7 +67,8 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 		resulthu := 0
 		var maxmsg string
 		var resultwin win.Common_Win
-		log.Print("result:")
+		// log.Print("result:")
+		output += "result:\n"
 		for i := range result {
 			//log.Println(win.CommonString(result[i]))
 			yakuman, msg := yaku_common.Yakuman_Check(result[i])
@@ -78,15 +88,17 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 				}
 			}
 		}
-		log.Println(win.CommonString(resultwin))
+		// log.Println(win.CommonString(resultwin))
+		output += win.CommonString(resultwin) + "\n"
 		var oyaka, tsumo bool
 		if resultwin.SelfWind == 1 {
 			oyaka = true
 		}
 		tsumo = resultwin.Tsumo
 		if maxyakuman > 0 {
-			log.Println(score.CalcYakumanPointsString(maxyakuman, oyaka, tsumo, maxmsg))
-			return
+			// log.Println(score.CalcYakumanPointsString(maxyakuman, oyaka, tsumo, maxmsg))
+			output += score.CalcYakumanPointsString(maxyakuman, oyaka, tsumo, maxmsg) + "\n"
+			return output
 		} else if maxhan != 0 {
 
 			if maxyakuman == 0 {
@@ -96,7 +108,10 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 				maxmsg += doramsg
 			}
 			log.Println(score.CalcPointsString(maxhan, resulthu, oyaka, tsumo, maxmsg))
-			return //without using local yakus,
+			output += score.CalcPointsString(maxhan, resulthu, oyaka, tsumo, maxmsg) + "\n"
+			return output
+			// return
+			//without using local yakus,
 			//if a set of winning tiles both satisfy common_win and seven_pairs_win, than the former intepretation is always better
 			//since 2peko is 3han and sevenpairs is 2han
 			//also, that's the case unless you consider some obscure local yakus
@@ -106,9 +121,10 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 	tempsevenpair := win.ConvertCommonToSeven(tempwin)
 	result2, valid2 := win.CreateSevenPair(a, tempsevenpair)
 	if valid2 {
-		log.Print("result:")
-
-		log.Println(win.SevenPairString(result2))
+		// log.Print("result:")
+		output += "result:\n"
+		// log.Println(win.SevenPairString(result2))
+		output += win.SevenPairString(result2) + "\n"
 		var oyaka, tsumo bool
 		if result2.SelfWind == 1 {
 			oyaka = true
@@ -117,12 +133,14 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 		hu := 25
 		yakuman, msg := yaku_sevenpair.Yakuman_Check(result2)
 		if yakuman > 0 {
-			log.Println(score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg))
+			// log.Println(score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg))
+			output += score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg) + "\n"
 		} else {
 			han, msg2 := yaku_sevenpair.CalculateYaku(result2)
-			log.Println(score.CalcPointsString(han, hu, oyaka, tsumo, msg2))
+			// log.Println(score.CalcPointsString(han, hu, oyaka, tsumo, msg2))
+			output += score.CalcPointsString(han, hu, oyaka, tsumo, msg2) + "\n"
 		}
-		return
+		return output
 
 	}
 	var tsumo, oyaka, tenho, jiho bool
@@ -135,7 +153,8 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 	result3, valid3 := win.Create13Orphans(a, tsumo, oyaka, tenho, jiho)
 
 	if valid3 {
-		log.Println("result:")
+		// log.Println("result:")
+		output += "result:\n"
 		yakuman := 1
 		var msg string
 		if tenho {
@@ -152,10 +171,12 @@ func calc(handstr string, furolist []string, tempwin win.Common_Win) {
 			msg += "国士無双 役満\n"
 		}
 
-		log.Println(score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg))
-		return
+		// log.Println(score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg))
+		output += score.CalcYakumanPointsString(yakuman, oyaka, tsumo, msg) + "\n"
+		return output
 	}
-	log.Println("Your input is invalid")
+	// log.Println("Your input is invalid")
+	return "Your input is invalid"
 
 }
 

@@ -2,8 +2,9 @@ package yaku_sevenpair
 
 import (
 	"fmt"
-	"jpmj_calc/win"
 	"log"
+
+	"github.com/dQw4w/jpmj_calc/services/calc/win"
 )
 
 func Non_Yakuman_Special(sp win.Seven_Pairs_Win) (int, string) {
@@ -168,30 +169,30 @@ func CalculateDora(sp win.Seven_Pairs_Win) (int, string) {
 
 	tiles := win.ConvertSevenPairsToMap(sp)
 	var dora_han int
-	for i := range sp.Motedora_suit {
+	for i := range sp.MotedoraSuit {
 		var dora_rank uint8
-		if sp.Motedora_suit[i] == 'z' {
-			if sp.Motedora_rank[i] >= 5 {
-				if sp.Motedora_rank[i] == 7 {
+		if sp.MotedoraSuit[i] == 'z' {
+			if sp.MotedoraRank[i] >= 5 {
+				if sp.MotedoraRank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = sp.Motedora_rank[i] + 1
+					dora_rank = sp.MotedoraRank[i] + 1
 				}
 			} else {
-				if sp.Motedora_rank[i] == 4 {
+				if sp.MotedoraRank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = sp.Motedora_rank[i] + 1
+					dora_rank = sp.MotedoraRank[i] + 1
 				}
 			}
 		} else {
-			if sp.Motedora_rank[i] == 9 {
+			if sp.MotedoraRank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = sp.Motedora_rank[i] + 1
+				dora_rank = sp.MotedoraRank[i] + 1
 			}
 		}
-		dora_han += tiles[sp.Motedora_suit[i]][dora_rank]
+		dora_han += tiles[sp.MotedoraSuit[i]][dora_rank]
 	}
 	if dora_han != 0 {
 		han += dora_han
@@ -202,30 +203,30 @@ func CalculateDora(sp win.Seven_Pairs_Win) (int, string) {
 		msg += fmt.Sprintf("赤ドラ %v飜\n", sp.Akadora)
 	}
 	var uradora_han int
-	for i := range sp.Motedora_suit {
+	for i := range sp.MotedoraSuit {
 		var dora_rank uint8
-		if sp.Motedora_suit[i] == 'z' {
-			if sp.Motedora_rank[i] >= 5 {
-				if sp.Motedora_rank[i] == 7 {
+		if sp.MotedoraSuit[i] == 'z' {
+			if sp.MotedoraRank[i] >= 5 {
+				if sp.MotedoraRank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = sp.Motedora_rank[i] + 1
+					dora_rank = sp.MotedoraRank[i] + 1
 				}
 			} else {
-				if sp.Motedora_rank[i] == 4 {
+				if sp.MotedoraRank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = sp.Motedora_rank[i] + 1
+					dora_rank = sp.MotedoraRank[i] + 1
 				}
 			}
 		} else {
-			if sp.Motedora_rank[i] == 9 {
+			if sp.MotedoraRank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = sp.Motedora_rank[i] + 1
+				dora_rank = sp.MotedoraRank[i] + 1
 			}
 		}
-		uradora_han += tiles[sp.Motedora_suit[i]][dora_rank]
+		uradora_han += tiles[sp.MotedoraSuit[i]][dora_rank]
 	}
 	if uradora_han != 0 {
 		han += uradora_han

@@ -2,19 +2,30 @@ package win
 
 import (
 	"errors"
-	"jpmj_calc/combination"
-	"jpmj_calc/hand"
+
+	"github.com/dQw4w/jpmj_calc/services/calc/hand"
+
+	"github.com/dQw4w/jpmj_calc/services/calc/combination"
+)
+
+type Wind uint8
+
+const (
+	EAST Wind = iota + 1
+	SOUTH
+	WEST
+	NORTH
 )
 
 type Common_Win struct { //一般型
-	MenziList    [4]combination.Menzi
-	Eye          combination.Pair
-	Win_Com_IDX  int // 4 represents eye
-	Win_Tile_IDX int
-	Tsumo        bool
-	Menchin      bool
-	SelfWind     uint8 //1234 ESWN
-	FieldWind    uint8 //1234
+	MenziList  [4]combination.Menzi
+	Eye        combination.Pair
+	WinComIDX  int // 4 represents eye
+	WinTileIDX int
+	Tsumo      bool
+	Menchin    bool
+	SelfWind   uint8 //1234 ESWN
+	FieldWind  uint8 //1234
 
 	//special
 	Reach       bool
@@ -29,21 +40,21 @@ type Common_Win struct { //一般型
 	TenHo bool
 	JiHo  bool
 
-	Akadora       int
-	Motedora_suit []byte
-	Motedora_rank []uint8
+	Akadora      int
+	MotedoraSuit []byte
+	MotedoraRank []uint8
 
-	Uradora_suit []byte
-	Uradora_rank []uint8
+	UradoraSuit []byte
+	UradoraRank []uint8
 }
 
 type Seven_Pairs_Win struct { //七對子型
-	PairList    [7]combination.Pair
-	Win_Com_IDX int
-	Tsumo       bool
-	Menchin     bool
-	SelfWind    uint8 //1234 ESWN
-	FieldWind   uint8 //1234
+	PairList  [7]combination.Pair
+	WinComIDX int
+	Tsumo     bool
+	Menchin   bool
+	SelfWind  uint8 //1234 ESWN
+	FieldWind uint8 //1234
 
 	//specials
 	Reach       bool
@@ -57,12 +68,12 @@ type Seven_Pairs_Win struct { //七對子型
 	TenHo bool
 	JiHo  bool
 
-	Akadora       int
-	Motedora_suit []byte
-	Motedora_rank []uint8
+	Akadora      int
+	MotedoraSuit []byte
+	MotedoraRank []uint8
 
-	Uradora_suit []byte
-	Uradora_rank []uint8
+	UradoraSuit []byte
+	UradoraRank []uint8
 }
 type Thirteen_Orphans struct { //國士無雙型
 	Repeat_Suit   byte
@@ -177,8 +188,8 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 				count++
 				if count > 1 {
 					win_copy, _ := CopyCommon(result[i])
-					win_copy.Win_Com_IDX = j
-					win_copy.Win_Tile_IDX = idx
+					win_copy.WinComIDX = j
+					win_copy.WinTileIDX = idx
 					if win_copy.Tsumo {
 						win_copy.MenziList[j].Furo = false
 					} else {
@@ -186,8 +197,8 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 					}
 					result = append(result, win_copy)
 				} else {
-					result[i].Win_Com_IDX = j
-					result[i].Win_Tile_IDX = idx
+					result[i].WinComIDX = j
+					result[i].WinTileIDX = idx
 					if result[i].Tsumo {
 						result[i].MenziList[j].Furo = false
 					} else {
@@ -200,8 +211,8 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 			count++
 			if count > 1 {
 				win_copy, _ := CopyCommon(result[i])
-				win_copy.Win_Com_IDX = 4
-				win_copy.Win_Tile_IDX = idx
+				win_copy.WinComIDX = 4
+				win_copy.WinTileIDX = idx
 				if win_copy.Tsumo {
 					win_copy.Eye.Furo = false
 				} else {
@@ -209,8 +220,8 @@ func CreateCommon(hd hand.Hand, cw Common_Win) ([]Common_Win, bool) {
 				}
 				result = append(result, win_copy)
 			} else {
-				result[i].Win_Com_IDX = 4
-				result[i].Win_Tile_IDX = idx
+				result[i].WinComIDX = 4
+				result[i].WinTileIDX = idx
 				if result[i].Tsumo {
 					result[i].Eye.Furo = false
 				} else {
@@ -229,8 +240,8 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 	var err2 error
 	dst.Eye, _ = combination.NewPair(src.Eye.Suit, src.Eye.Rank, src.Eye.Furo)
 
-	dst.Win_Com_IDX = src.Win_Com_IDX
-	dst.Win_Tile_IDX = src.Win_Tile_IDX
+	dst.WinComIDX = src.WinComIDX
+	dst.WinTileIDX = src.WinTileIDX
 	dst.Tsumo = src.Tsumo
 	dst.Menchin = src.Menchin
 	dst.SelfWind = src.SelfWind
@@ -245,10 +256,10 @@ func CopyCommon(src Common_Win) (Common_Win, error) {
 	dst.TenHo = src.TenHo
 	dst.JiHo = src.JiHo
 	dst.Akadora = src.Akadora
-	dst.Motedora_suit = src.Motedora_suit
-	dst.Motedora_rank = src.Motedora_rank
-	dst.Uradora_suit = src.Uradora_suit
-	dst.Uradora_rank = src.Uradora_rank
+	dst.MotedoraSuit = src.MotedoraSuit
+	dst.MotedoraRank = src.MotedoraRank
+	dst.UradoraSuit = src.UradoraSuit
+	dst.UradoraRank = src.UradoraRank
 
 	for i := range dst.MenziList {
 		dst.MenziList[i], err2 = combination.New_Menzi(src.MenziList[i].Type, src.MenziList[i].Suit, src.MenziList[i].Rank, src.MenziList[i].Furo)
@@ -542,7 +553,7 @@ func CreateSevenPair(hd hand.Hand, sp Seven_Pairs_Win) (Seven_Pairs_Win, bool) {
 
 	for i := range result.PairList {
 		if hd.Win_Rank == result.PairList[i].Rank && hd.Win_Suit == result.PairList[i].Suit {
-			result.Win_Com_IDX = i
+			result.WinComIDX = i
 			break
 		}
 	}
@@ -551,30 +562,30 @@ func CreateSevenPair(hd hand.Hand, sp Seven_Pairs_Win) (Seven_Pairs_Win, bool) {
 }
 func CopySevenPair(sp Seven_Pairs_Win) Seven_Pairs_Win {
 	new := Seven_Pairs_Win{
-		Win_Com_IDX:   sp.Win_Com_IDX,
-		Tsumo:         sp.Tsumo,
-		Menchin:       sp.Menchin,
-		SelfWind:      sp.SelfWind,
-		FieldWind:     sp.FieldWind,
-		Reach:         sp.Reach,
-		DoubleReach:   sp.DoubleReach,
-		RinShan:       sp.RinShan,
-		HaiTei:        sp.HaiTei,
-		HoTei:         sp.HoTei,
-		Ippatsu:       sp.Ippatsu,
-		TenHo:         sp.TenHo,
-		JiHo:          sp.JiHo,
-		Akadora:       sp.Akadora,
-		Motedora_suit: make([]byte, len(sp.Motedora_suit)),
-		Motedora_rank: make([]uint8, len(sp.Motedora_rank)),
-		Uradora_suit:  make([]byte, len(sp.Uradora_suit)),
-		Uradora_rank:  make([]uint8, len(sp.Uradora_rank)),
+		WinComIDX:    sp.WinComIDX,
+		Tsumo:        sp.Tsumo,
+		Menchin:      sp.Menchin,
+		SelfWind:     sp.SelfWind,
+		FieldWind:    sp.FieldWind,
+		Reach:        sp.Reach,
+		DoubleReach:  sp.DoubleReach,
+		RinShan:      sp.RinShan,
+		HaiTei:       sp.HaiTei,
+		HoTei:        sp.HoTei,
+		Ippatsu:      sp.Ippatsu,
+		TenHo:        sp.TenHo,
+		JiHo:         sp.JiHo,
+		Akadora:      sp.Akadora,
+		MotedoraSuit: make([]byte, len(sp.MotedoraSuit)),
+		MotedoraRank: make([]uint8, len(sp.MotedoraRank)),
+		UradoraSuit:  make([]byte, len(sp.UradoraSuit)),
+		UradoraRank:  make([]uint8, len(sp.UradoraRank)),
 	}
 
-	copy(new.Motedora_suit, sp.Motedora_suit)
-	copy(new.Motedora_rank, sp.Motedora_rank)
-	copy(new.Uradora_suit, sp.Uradora_suit)
-	copy(new.Uradora_rank, sp.Uradora_rank)
+	copy(new.MotedoraSuit, sp.MotedoraSuit)
+	copy(new.MotedoraRank, sp.MotedoraRank)
+	copy(new.UradoraSuit, sp.UradoraSuit)
+	copy(new.UradoraRank, sp.UradoraRank)
 
 	new.PairList = [7]combination.Pair{}
 	copy(new.PairList[:], sp.PairList[:])
@@ -678,16 +689,16 @@ func SevenPairString(s Seven_Pairs_Win) string {
 func GetWinningTile(cw Common_Win) (byte, uint8) {
 	var suit byte
 	var rank uint8
-	if cw.Win_Com_IDX == 4 {
+	if cw.WinComIDX == 4 {
 		suit = cw.Eye.Suit
 		rank = cw.Eye.Rank
 	} else {
-		suit = cw.MenziList[cw.Win_Com_IDX].Suit
+		suit = cw.MenziList[cw.WinComIDX].Suit
 		var addIDX uint8 = 0
-		if cw.MenziList[cw.Win_Com_IDX].Type == 'S' {
-			addIDX = uint8(cw.Win_Tile_IDX)
+		if cw.MenziList[cw.WinComIDX].Type == 'S' {
+			addIDX = uint8(cw.WinTileIDX)
 		}
-		rank = cw.MenziList[cw.Win_Com_IDX].Rank + addIDX
+		rank = cw.MenziList[cw.WinComIDX].Rank + addIDX
 	}
 	return suit, rank
 }
@@ -743,30 +754,30 @@ func ConvertCommonToSeven(cw Common_Win) Seven_Pairs_Win {
 	//TODO: copy the elements that Common_Win and Seven_Pairs_Win have in common, from cw into a new Seven_Pairs_Win, and return the Seven_Pairs_Win
 
 	sp := Seven_Pairs_Win{
-		Win_Com_IDX:   cw.Win_Com_IDX,
-		Tsumo:         cw.Tsumo,
-		Menchin:       cw.Menchin,
-		SelfWind:      cw.SelfWind,
-		FieldWind:     cw.FieldWind,
-		Reach:         cw.Reach,
-		DoubleReach:   cw.DoubleReach,
-		RinShan:       cw.RinShan,
-		HaiTei:        cw.HaiTei,
-		HoTei:         cw.HoTei,
-		Ippatsu:       cw.Ippatsu,
-		TenHo:         cw.TenHo,
-		JiHo:          cw.JiHo,
-		Akadora:       cw.Akadora,
-		Motedora_suit: make([]byte, len(cw.Motedora_suit)),
-		Motedora_rank: make([]uint8, len(cw.Motedora_rank)),
-		Uradora_suit:  make([]byte, len(cw.Uradora_suit)),
-		Uradora_rank:  make([]uint8, len(cw.Uradora_rank)),
+		WinComIDX:    cw.WinComIDX,
+		Tsumo:        cw.Tsumo,
+		Menchin:      cw.Menchin,
+		SelfWind:     cw.SelfWind,
+		FieldWind:    cw.FieldWind,
+		Reach:        cw.Reach,
+		DoubleReach:  cw.DoubleReach,
+		RinShan:      cw.RinShan,
+		HaiTei:       cw.HaiTei,
+		HoTei:        cw.HoTei,
+		Ippatsu:      cw.Ippatsu,
+		TenHo:        cw.TenHo,
+		JiHo:         cw.JiHo,
+		Akadora:      cw.Akadora,
+		MotedoraSuit: make([]byte, len(cw.MotedoraSuit)),
+		MotedoraRank: make([]uint8, len(cw.MotedoraRank)),
+		UradoraSuit:  make([]byte, len(cw.UradoraSuit)),
+		UradoraRank:  make([]uint8, len(cw.UradoraRank)),
 	}
 
-	copy(sp.Motedora_suit, cw.Motedora_suit)
-	copy(sp.Motedora_rank, cw.Motedora_rank)
-	copy(sp.Uradora_suit, cw.Uradora_suit)
-	copy(sp.Uradora_rank, cw.Uradora_rank)
+	copy(sp.MotedoraSuit, cw.MotedoraSuit)
+	copy(sp.MotedoraRank, cw.MotedoraRank)
+	copy(sp.UradoraSuit, cw.UradoraSuit)
+	copy(sp.UradoraRank, cw.UradoraRank)
 
 	return sp
 

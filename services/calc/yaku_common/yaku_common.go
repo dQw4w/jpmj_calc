@@ -2,9 +2,10 @@ package yaku_common
 
 import (
 	"fmt"
-	"jpmj_calc/combination"
-	"jpmj_calc/win"
 	"log"
+
+	"github.com/dQw4w/jpmj_calc/services/calc/combination"
+	"github.com/dQw4w/jpmj_calc/services/calc/win"
 )
 
 func Non_Yakuman_Special(cw win.Common_Win) (int, string) {
@@ -170,23 +171,23 @@ func Pinhu(cw win.Common_Win) (int, string) { // unfinished
 			return 0, ""
 		}
 	}
-	if cw.Win_Com_IDX == 4 { //單騎
+	if cw.WinComIDX == 4 { //單騎
 		//log.Println("d")
 
 		return 0, ""
 	}
-	if cw.Win_Tile_IDX == 1 { //坎張
+	if cw.WinTileIDX == 1 { //坎張
 		//log.Println("e")
 
 		return 0, ""
 	}
 	//邊張
-	if cw.Win_Tile_IDX == 0 && cw.MenziList[cw.Win_Com_IDX].Rank == 7 {
+	if cw.WinTileIDX == 0 && cw.MenziList[cw.WinComIDX].Rank == 7 {
 		//log.Println("f")
 
 		return 0, ""
 	}
-	if cw.Win_Tile_IDX == 2 && cw.MenziList[cw.Win_Com_IDX].Rank == 1 {
+	if cw.WinTileIDX == 2 && cw.MenziList[cw.WinComIDX].Rank == 1 {
 		//log.Println("g")
 
 		return 0, ""
@@ -555,7 +556,7 @@ func FourConcealedTrp(cw win.Common_Win) (int, string) {
 			return 0, ""
 		}
 	}
-	if cw.Win_Com_IDX == 4 { //pair
+	if cw.WinComIDX == 4 { //pair
 		return 2, "四暗刻単騎 二倍役満\n"
 	}
 	return 1, "四暗刻 役満\n"
@@ -763,30 +764,30 @@ func CalculateDora(cw win.Common_Win) (int, string) { //寶牌
 	var msg string
 	tiles := win.ConvertWinToMap(cw)
 	var dora_han int
-	for i := range cw.Motedora_suit {
+	for i := range cw.MotedoraSuit {
 		var dora_rank uint8
-		if cw.Motedora_suit[i] == 'z' {
-			if cw.Motedora_rank[i] >= 5 {
-				if cw.Motedora_rank[i] == 7 {
+		if cw.MotedoraSuit[i] == 'z' {
+			if cw.MotedoraRank[i] >= 5 {
+				if cw.MotedoraRank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = cw.MotedoraRank[i] + 1
 				}
 			} else {
-				if cw.Motedora_rank[i] == 4 {
+				if cw.MotedoraRank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = cw.Motedora_rank[i] + 1
+					dora_rank = cw.MotedoraRank[i] + 1
 				}
 			}
 		} else {
-			if cw.Motedora_rank[i] == 9 {
+			if cw.MotedoraRank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = cw.Motedora_rank[i] + 1
+				dora_rank = cw.MotedoraRank[i] + 1
 			}
 		}
-		dora_han += tiles[cw.Motedora_suit[i]][dora_rank]
+		dora_han += tiles[cw.MotedoraSuit[i]][dora_rank]
 	}
 	if dora_han != 0 {
 		han += dora_han
@@ -797,30 +798,30 @@ func CalculateDora(cw win.Common_Win) (int, string) { //寶牌
 		msg += fmt.Sprintf("赤ドラ %v飜\n", cw.Akadora)
 	}
 	var uradora_han int
-	for i := range cw.Uradora_suit {
+	for i := range cw.UradoraSuit {
 		var dora_rank uint8
-		if cw.Uradora_suit[i] == 'z' {
-			if cw.Uradora_rank[i] >= 5 {
-				if cw.Uradora_rank[i] == 7 {
+		if cw.UradoraSuit[i] == 'z' {
+			if cw.UradoraRank[i] >= 5 {
+				if cw.UradoraRank[i] == 7 {
 					dora_rank = 5
 				} else {
-					dora_rank = cw.Uradora_rank[i] + 1
+					dora_rank = cw.UradoraRank[i] + 1
 				}
 			} else {
-				if cw.Uradora_rank[i] == 4 {
+				if cw.UradoraRank[i] == 4 {
 					dora_rank = 1
 				} else {
-					dora_rank = cw.Uradora_rank[i] + 1
+					dora_rank = cw.UradoraRank[i] + 1
 				}
 			}
 		} else {
-			if cw.Uradora_rank[i] == 9 {
+			if cw.UradoraRank[i] == 9 {
 				dora_rank = 1
 			} else {
-				dora_rank = cw.Uradora_rank[i] + 1
+				dora_rank = cw.UradoraRank[i] + 1
 			}
 		}
-		uradora_han += tiles[cw.Uradora_suit[i]][dora_rank]
+		uradora_han += tiles[cw.UradoraSuit[i]][dora_rank]
 	}
 
 	if uradora_han != 0 {

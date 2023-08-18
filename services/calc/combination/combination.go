@@ -113,7 +113,7 @@ func NewKanzi_closed(suit byte, rank uint8, furo bool) (Menzi, error) {
 		Type: 'C',
 		Suit: suit,
 		Rank: rank,
-		Furo: false,
+		Furo: furo,
 	}, nil
 }
 func NewKanzi_open(suit byte, rank uint8, furo bool) (Menzi, error) {
@@ -126,7 +126,7 @@ func NewKanzi_open(suit byte, rank uint8, furo bool) (Menzi, error) {
 		Type: 'O',
 		Suit: suit,
 		Rank: rank,
-		Furo: true,
+		Furo: furo,
 	}, nil
 }
 func New_Menzi(tp byte, suit byte, rank uint8, furo bool) (Menzi, error) {
