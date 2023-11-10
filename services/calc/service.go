@@ -37,7 +37,7 @@ func (s *CalculateService) Calculate(handstr string, akarehai string, furolist [
 	// tempwin.Reach = true
 	// //tempwin.TenHo = true
 	// //tempwin.JiHo = true
-	// tempwin.Menchin = true // this is always set to true by default, no need to modify
+	tempwin.Menchin = true // this is always set to true by default, no need to modify
 	// tempwin.Tsumo = true
 	// tempwin.SelfWind = 1
 	// tempwin.FieldWind = 1
@@ -50,6 +50,9 @@ func (s *CalculateService) Calculate(handstr string, akarehai string, furolist [
 	//tempwin.ChanKan = true
 
 	for i := range furolist {
+		if furolist[i] == "" {
+			continue
+		}
 		newmenzi, _, err1 := combination.ConvertStrToMenzi(furolist[i])
 		if err1 == nil {
 			tempwin, _ = win.AddMenzi(newmenzi, tempwin)

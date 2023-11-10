@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/dQw4w/jpmj_calc/controllers/calc"
 
 	"github.com/gin-gonic/gin"
@@ -8,15 +10,17 @@ import (
 
 func main() {
 
-	c := gin.Default()
+	r := gin.Default()
 
-	c.Static("/static", "./static")
-	c.LoadHTMLGlob("templates/*")
+	r.Static("/static", "./static")
+	r.LoadHTMLGlob("templates/*")
 
 	calcController := calc.NewCalculateController()
-	c.GET("/calc", calcController.CalculateResults)
-
-	c.Run(":8080")
+	r.POST("/calc", calcController.CalculateResults)
+	r.GET("/calc", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "page.html", nil)
+	})
+	r.Run(":8082")
 
 	// handstr := "12340678mps11122z"
 	// furolist := []string{ /*"333z", "444z"*/ } //TODO: add furo menzis here (including 暗槓, XnnXs is the format for it, n:rank,s:suit)

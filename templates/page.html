@@ -1,69 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-tw">
 
 <head>
-    <title>Calculator</title>
+    <title>日麻計算機</title>
 </head>
 
 <body>
-    <form action="/calc" method="GET">
-        <label for="hand">Hand:</label>
-        <input type="text" id="hand" name="hand" required><br>
+    <!-- <form action="/calc" method="GET"> -->
+    <form id="calcForm" action="/calc" method="POST">
+        <label for="hand">手牌:</label>
+        <input type="text" id="hand" name="hand" placeholder="如12340678mp111s44z" required><br>
 
-        <label for="akarehai">Akarehai:</label>
-        <input type="text" id="akarehai" name="akarehai" required><br>
+        <label for="akarehai">和了牌:</label>
+        <input type="text" id="akarehai" name="akarehai" placeholder="如9m" required><br>
 
-        <label for="furo">Furo:</label>
-        <input type="text" id="furo" name="furo[]" multiple><br>
+        <!-- <label for="furo">Furo:</label>
+        <input type="text" id="furo" name="furo[]" multiple><br> -->
 
-        <label for="self_wind">Self Wind:</label>
+        <label for="furo">副露(若無請留白):</label><br>
+        <input type="text" name="furo" placeholder="副露1"><br>
+        <input type="text" name="furo" placeholder="副露2"><br>
+        <input type="text" name="furo" placeholder="副露3"><br>
+        <input type="text" name="furo" placeholder="副露4"><br>
+
+        <br>
+
+        <label for="self_wind">自風:</label>
         <select id="self_wind" name="self_wind" required>
-            <option value="1">East</option>
-            <option value="2">South</option>
-            <option value="3">West</option>
-            <option value="4">North</option>
+            <option value="1">東</option>
+            <option value="2">南</option>
+            <option value="3">西</option>
+            <option value="4">北</option>
         </select><br>
 
-        <label for="field_wind">Field Wind:</label>
+
+        <label for="field_wind">場風:</label>
         <select id="field_wind" name="field_wind" required>
-            <option value="1">East</option>
-            <option value="2">South</option>
-            <option value="3">West</option>
-            <option value="4">North</option>
+            <option value="1">東</option>
+            <option value="2">南</option>
+            <option value="3">西</option>
+            <option value="4">北</option>
         </select><br>
 
-        <label for="tsumo">Tsumo:</label>
+        <br>
+        <label for="tsumo">自摸</label>
         <input type="checkbox" id="tsumo" name="tsumo"><br>
 
-        <label for="menchin">Menchin:</label>
-        <input type="checkbox" id="menchin" name="menchin"><br>
+        <!-- <label for="menchin">門清</label>
+        <input type="checkbox" id="menchin" name="menchin"><br> -->
 
-        <label for="reach">Reach:</label>
+        <br>
+
+        <label for="reach">立直</label>
         <input type="checkbox" id="reach" name="reach"><br>
 
-        <label for="double_reach">Double Reach:</label>
+        <label for="double_reach">兩立直</label>
         <input type="checkbox" id="double_reach" name="double_reach"><br>
 
-        <label for="chankan">ChanKan:</label>
-        <input type="checkbox" id="chankan" name="chankan"><br>
-
-        <label for="rinshan">RinShan:</label>
-        <input type="checkbox" id="rinshan" name="rinshan"><br>
-
-        <label for="haitei">HaiTei:</label>
-        <input type="checkbox" id="haitei" name="haitei"><br>
-
-        <label for="hotei">HoTei:</label>
-        <input type="checkbox" id="hotei" name="hotei"><br>
-
-        <label for="ippatsu">Ippatsu:</label>
+        <label for="ippatsu">一發</label>
         <input type="checkbox" id="ippatsu" name="ippatsu"><br>
 
-        <label for="tenho">TenHo:</label>
+        <label for="chankan">搶槓</label>
+        <input type="checkbox" id="chankan" name="chankan"><br>
+
+        <label for="rinshan">嶺上開花</label>
+        <input type="checkbox" id="rinshan" name="rinshan"><br>
+
+        <label for="haitei">海底摸月</label>
+        <input type="checkbox" id="haitei" name="haitei"><br>
+
+        <label for="hotei">河底撈魚</label>
+        <input type="checkbox" id="hotei" name="hotei"><br>
+
+
+        <label for="tenho">天和</label>
         <input type="checkbox" id="tenho" name="tenho"><br>
 
-        <label for="jiho">JiHo:</label>
+        <label for="jiho">地和</label>
         <input type="checkbox" id="jiho" name="jiho"><br>
+
+        <br>
 
         <label for="motedora_suit">Motedora Suit:</label>
         <input type="text" id="motedora_suit" name="motedora_suit[]" multiple><br>
@@ -79,6 +95,48 @@
 
         <input type="submit" value="Calculate">
     </form>
+
+    <!-- Display results -->
+    <div id="resultsBox" style="border: 1px solid #ccc; padding: 10px; margin-top: 20px;"></div>
+
+    <script>
+        const calcForm = document.getElementById("calcForm");
+        const resultsBox = document.getElementById("resultsBox");
+
+        calcForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            //console.log("Hello,world")
+            const formData = new FormData(calcForm);
+
+            // Convert checkboxes to "true" or "false" values
+            formData.forEach((value, key) => {
+                // console.log(`Key: ${key}, Value: ${value}`);
+                if (value == "on") {
+                    //console.log(`Converting ${key} value to true`);
+                    formData.set(key, "true");
+                }
+            });
+
+            console.log(formData);
+            const response = await fetch("/calc", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                const resultString = await response.text();
+                updateResults(resultString);
+            } else {
+                console.error("Request failed:", response.status, response.statusText);
+                updateResults("Failed to calculate results.");
+            }
+        });
+
+        // Function to update the results box content
+        function updateResults(content) {
+            resultsBox.textContent = content;
+        }
+    </script>
 </body>
 
 </html>
