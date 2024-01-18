@@ -516,6 +516,9 @@ func CreateSevenPair(hd hand.Hand, sp Seven_Pairs_Win) (Seven_Pairs_Win, bool) {
 	if is3dup(hd) {
 		return Seven_Pairs_Win{}, false
 	}
+	if len(hd.Man)%2 == 1 || len(hd.Sou)%2 == 1 || len(hd.Pin)%2 == 1 || len(hd.Zi)%2 == 1 {
+		return Seven_Pairs_Win{}, false
+	}
 	for i := 0; i < len(hd.Man); i += 2 {
 		if hd.Man[i] == hd.Man[i+1] {
 			pair, _ := combination.NewPair('m', hd.Man[i], false)

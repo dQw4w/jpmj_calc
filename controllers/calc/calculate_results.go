@@ -34,8 +34,8 @@ type calcRequest struct {
 	TenHo bool `form:"tenho"`
 	JiHo  bool `form:"jiho"`
 
-	MotedoraSuit []string `form:"motedora_suit"`
-	MotedoraRank []uint8  `form:"motedora_rank"`
+	Motedora string `form:"motedora"`
+	// MotedoraRank []uint8  `form:"motedora_rank"`
 
 	UradoraSuit []string `form:"uradora_suit"`
 	UradoraRank []uint8  `form:"uradora_rank"`
@@ -44,16 +44,23 @@ type calcRequest struct {
 // omiempty
 
 func (req calcRequest) ToCommonWin() (win.Common_Win, error) {
-	moteSuit, err := StringArrToByteArr(req.MotedoraSuit)
-	if err != nil {
-		log.Error(err)
-		return win.Common_Win{}, err
+	// moteSuit, err := StringArrToByteArr(req.MotedoraSuit)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return win.Common_Win{}, err
+	// }
+	// uraSuit, err := StringArrToByteArr(req.UradoraSuit)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return win.Common_Win{}, err
+	// }
+	moteSuit := make([]byte, 0)
+	moteRank := make([]uint8, 0)
+	moteStrLen := len(req.Motedora)
+	if moteStrLen%2 != 0 {
+		return win.Common_Win{}, errors.New("invalid")
 	}
-	uraSuit, err := StringArrToByteArr(req.UradoraSuit)
-	if err != nil {
-		log.Error(err)
-		return win.Common_Win{}, err
-	}
+
 	commonWin := win.Common_Win{
 		MenziList:    [4]combination.Menzi{},
 		Eye:          combination.Pair{},
@@ -71,9 +78,9 @@ func (req calcRequest) ToCommonWin() (win.Common_Win, error) {
 		TenHo:        req.TenHo,
 		JiHo:         req.JiHo,
 		MotedoraSuit: moteSuit,
-		MotedoraRank: req.MotedoraRank,
-		UradoraSuit:  uraSuit,
-		UradoraRank:  req.UradoraRank,
+		MotedoraRank: moteRank,
+		// UradoraSuit:  uraSuit,
+		// UradoraRank:  req.UradoraRank,
 	}
 
 	return commonWin, nil

@@ -6,6 +6,7 @@ import (
 	"github.com/dQw4w/jpmj_calc/controllers/calc"
 
 	"github.com/gin-gonic/gin"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func main() {
@@ -20,6 +21,8 @@ func main() {
 	r.GET("/calc", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "page.html", nil)
 	})
+	go open.Run("http://localhost:8082/calc")
+
 	r.Run(":8082")
 
 	// handstr := "12340678mps11122z"
